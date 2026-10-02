@@ -1,0 +1,700 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>가지 병해충 현장조사 V3</title>
+<style>
+:root {
+  --text-main: #0f172a;
+  --text-muted: #334155;
+  --bg-page: #f1f5f9;
+  --bg-card: #ffffff;
+  --border-strong: #1e293b;
+  --border-light: #94a3b8;
+  --primary: #15803d;
+  --primary-dark: #14532d;
+  --danger: #b91c1c;
+  --danger-bg: #fef2f2;
+}
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", sans-serif;
+  color: var(--text-main);
+  background: var(--bg-page);
+  line-height: 1.4;
+  padding-bottom: 100px; /* 하단 고정 네비게이션 공간 확보 */
+  touch-action: manipulation;
+}
+.wrap {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 12px;
+}
+.card {
+  background: var(--bg-card);
+  border: 2px solid var(--border-strong);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+}
+h1 {
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0 0 10px;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sub-info {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+/* 조사일자 설정 영역 */
+.date-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-light);
+}
+.date-row label {
+  font-size: 15px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.date-row input[type="date"] {
+  flex: 1;
+  max-width: 220px;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 8px 12px;
+  border: 2px solid var(--border-strong);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--text-main);
+}
+/* 상단 상태 바 */
+.top-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.slot-badge {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--primary-dark);
+  background: #dcfce7;
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid #86efac;
+}
+.progress-text {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-main);
+}
+.bar {
+  height: 12px;
+  background: #cbd5e1;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+}
+.bar i {
+  display: block;
+  height: 100%;
+  background: var(--primary);
+  width: 0;
+  transition: width 0.2s ease;
+}
+/* 입력 필드 */
+.field {
+  margin: 14px 0;
+}
+.field label {
+  display: block;
+  font-size: 15px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  color: var(--text-main);
+}
+.field input, .field textarea {
+  width: 100%;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 12px;
+  border: 2px solid var(--border-strong);
+  border-radius: 12px;
+  background: #ffffff;
+  color: var(--text-main);
+}
+.field textarea {
+  font-size: 16px;
+  font-weight: 500;
+  min-height: 70px;
+  resize: vertical;
+}
+.field input:focus, .field textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.25);
+}
+.field input[readonly] {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #64748b;
+}
+/* 수량 입력 그리드 */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 380px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* + / - 버튼 컨트롤러 (장갑 및 한 손 터치 최적화) */
+.num-control {
+  display: grid;
+  grid-template-columns: 60px 1fr 60px;
+  gap: 6px;
+}
+.num-control button {
+  border: 2px solid var(--border-strong);
+  border-radius: 12px;
+  background: #e2e8f0;
+  color: var(--text-main);
+  font-size: 28px;
+  font-weight: 900;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 0 var(--border-strong);
+}
+.num-control button:active {
+  background: #cbd5e1;
+  transform: translateY(2px);
+  box-shadow: none;
+}
+.num-control input {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 800;
+  border: 2px solid var(--border-strong);
+  border-radius: 12px;
+  padding: 0;
+  height: 60px;
+}
+/* 숫자 인풋 기본 스피너 제거 */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
+/* 유효성 검사 안내 메시지 */
+.warn-box {
+  display: none;
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: 2px solid var(--danger);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-weight: 800;
+  font-size: 14px;
+  margin: 12px 0;
+}
+/* 하단 고정 네비게이션 (한 손 엄지 터치 최적화) */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border-top: 2px solid var(--border-strong);
+  padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+}
+.bottom-nav-inner {
+  max-width: 680px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 10px;
+}
+.bottom-nav button {
+  border: 2px solid var(--border-strong);
+  border-radius: 14px;
+  height: 56px;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-prev {
+  background: #e2e8f0;
+  color: var(--text-main);
+  box-shadow: 0 3px 0 var(--border-strong);
+}
+.btn-next {
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 20px;
+  border-color: var(--primary-dark);
+  box-shadow: 0 3px 0 var(--primary-dark);
+}
+.bottom-nav button:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+/* 보조 액션 버튼 영역 */
+.action-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.action-grid button {
+  border: 2px solid var(--border-strong);
+  border-radius: 12px;
+  background: #f8fafc;
+  color: var(--text-main);
+  font-size: 15px;
+  font-weight: 800;
+  padding: 14px 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 0 var(--border-strong);
+}
+.action-grid button:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+/* 위험 영역 (초기화) 분리 */
+.danger-card {
+  border-color: #f87171;
+  background: #fffafa;
+  margin-top: 20px;
+}
+.danger-card summary {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--danger);
+  cursor: pointer;
+  padding: 4px 0;
+}
+.btn-reset {
+  margin-top: 10px;
+  width: 100%;
+  border: 2px solid var(--danger);
+  border-radius: 12px;
+  background: #fee2e2;
+  color: var(--danger);
+  font-size: 16px;
+  font-weight: 800;
+  padding: 12px;
+  cursor: pointer;
+}
+.btn-reset:active {
+  background: #fca5a5;
+}
+/* 상태 및 입력현황 박스 */
+#statusBox {
+  font-size: 14px;
+  max-height: 380px;
+  overflow-y: auto;
+  border: 2px solid var(--border-strong);
+}
+.status-item {
+  padding: 6px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+.status-item:last-child {
+  border-bottom: none;
+}
+.status-done {
+  color: var(--primary);
+  font-weight: 800;
+}
+.status-yet {
+  color: #94a3b8;
+  font-weight: 700;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- 상단 카드: 제목 및 조사일자 설정 -->
+  <div class="card">
+    <h1>🍆 가지 병해충 현장조사 V3</h1>
+    <div class="sub-info">3구역 × 10개체 (총 30개 고정) · 개체 ID 직접입력</div>
+    <div class="date-row">
+      <label for="surveyDate">📅 조사일자</label>
+      <input type="date" id="surveyDate">
+    </div>
+  </div>
+
+  <!-- 입력 폼 카드 -->
+  <div class="card">
+    <div class="top-status">
+      <div class="slot-badge" id="slotBadge">슬롯 1-1</div>
+      <div class="progress-text" id="progress">1 / 30</div>
+    </div>
+    <div class="bar"><i id="bar"></i></div>
+
+    <div class="field" style="margin-top: 16px;">
+      <label for="individualId">개체 ID <span style="color:var(--danger)">*</span></label>
+      <input id="individualId" placeholder="예: 1-1 (조사자 직접 입력)" autocomplete="off">
+    </div>
+
+    <div class="grid">
+      <div class="field">
+        <label for="fruit">조사 과실 수</label>
+        <div class="num-control">
+          <button type="button" data-f="fruit" data-d="-1" aria-label="조사 과실 수 감소">−</button>
+          <input id="fruit" type="number" min="0" inputmode="numeric" pattern="[0-9]*">
+          <button type="button" data-f="fruit" data-d="1" aria-label="조사 과실 수 증가">＋</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="sickFruit">병든 과실 수</label>
+        <div class="num-control">
+          <button type="button" data-f="sickFruit" data-d="-1" aria-label="병든 과실 수 감소">−</button>
+          <input id="sickFruit" type="number" min="0" inputmode="numeric" pattern="[0-9]*">
+          <button type="button" data-f="sickFruit" data-d="1" aria-label="병든 과실 수 증가">＋</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="bud">조사 꽃봉오리 수</label>
+        <div class="num-control">
+          <button type="button" data-f="bud" data-d="-1" aria-label="조사 꽃봉오리 수 감소">−</button>
+          <input id="bud" type="number" min="0" inputmode="numeric" pattern="[0-9]*">
+          <button type="button" data-f="bud" data-d="1" aria-label="조사 꽃봉오리 수 증가">＋</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="sickBud">병든 꽃봉오리 수</label>
+        <div class="num-control">
+          <button type="button" data-f="sickBud" data-d="-1" aria-label="병든 꽃봉오리 수 감소">−</button>
+          <input id="sickBud" type="number" min="0" inputmode="numeric" pattern="[0-9]*">
+          <button type="button" data-f="sickBud" data-d="1" aria-label="병든 꽃봉오리 수 증가">＋</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="rate">발병률(%)</label>
+      <input id="rate" value="" readonly placeholder="빈칸 (기존 형식 유지)">
+    </div>
+
+    <div class="field">
+      <label for="note">비고</label>
+      <textarea id="note" placeholder="필요한 경우만 입력 (스마트폰 음성입력 가능)"></textarea>
+    </div>
+
+    <div id="validation" class="warn-box"></div>
+  </div>
+
+  <!-- 관리 및 내보내기 액션 카드 -->
+  <div class="card action-grid">
+    <button type="button" id="list">📋 입력현황 보기</button>
+    <button type="button" id="csv">📥 CSV 내보내기</button>
+    <button type="button" id="backup" style="grid-column: span 2;">💾 백업 JSON 다운로드</button>
+  </div>
+
+  <!-- 현황 출력 영역 -->
+  <div class="card" id="statusBox" style="display:none"></div>
+
+  <!-- 데이터 초기화 위험 구역 (실수 방지용 접이식 분리) -->
+  <details class="card danger-card">
+    <summary>⚠️ 현재 조사일자 데이터 초기화 (주의)</summary>
+    <div style="font-size: 13px; color: var(--danger); margin-top: 8px; font-weight: 600;">
+      선택된 조사일자의 30개 개체 데이터가 모두 지워집니다. 필요한 경우 사전에 'CSV 내보내기' 또는 '백업 JSON'을 받아두세요.
+    </div>
+    <button type="button" class="btn-reset" id="reset">현재 날짜 데이터 전체 초기화</button>
+  </details>
+</div>
+
+<!-- 화면 하단 고정 네비게이션 바 (한 손 조작 최적화) -->
+<div class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <button type="button" id="prev" class="btn-prev">← 이전</button>
+    <button type="button" id="next" class="btn-next">저장 + 다음 →</button>
+  </div>
+</div>
+
+<script>
+// 1. 고정 30개 조사 슬롯 생성 (3구역 x 10개체)
+const slots = [];
+for (let z = 1; z <= 3; z++) {
+  for (let n = 1; n <= 10; n++) {
+    slots.push(`${z}-${n}`);
+  }
+}
+const fields = ['individualId', 'fruit', 'sickFruit', 'bud', 'sickBud', 'note'];
+let idx = 0;
+const $ = id => document.getElementById(id);
+
+// 로컬 날짜(YYYY-MM-DD) 반환 함수
+function getTodayString() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+// 2. 조사일자별 로컬스토리지 키 생성
+function getStorageKey() {
+  const dateVal = $('surveyDate').value || getTodayString();
+  return `eggplantSurveyV3_${dateVal}`;
+}
+
+function loadAll() {
+  try {
+    return JSON.parse(localStorage.getItem(getStorageKey()) || '{"rows":{}}');
+  } catch (e) {
+    return { rows: {} };
+  }
+}
+
+function saveAll(data) {
+  localStorage.setItem(getStorageKey(), JSON.stringify(data));
+}
+
+function saveCurrent() {
+  const data = loadAll();
+  const slot = slots[idx];
+  const row = {};
+  fields.forEach(f => row[f] = $(f).value);
+  data.rows[slot] = row;
+  saveAll(data);
+}
+
+// 화면 갱신
+function show() {
+  const data = loadAll();
+  const row = data.rows[slots[idx]] || {};
+  fields.forEach(f => $(f).value = row[f] ?? '');
+  $('rate').value = ''; // 발병률 빈칸 유지
+  $('slotBadge').textContent = `슬롯 ${slots[idx]}`;
+  $('progress').textContent = `${idx + 1} / 30`;
+  $('bar').style.width = `${((idx + 1) / 30) * 100}%`;
+  validate();
+}
+
+// 유효성 검사 (개체 ID 필수, 병든 수량 <= 조사 수량)
+function validate() {
+  const f = +$('fruit').value || 0;
+  const s = +$('sickFruit').value || 0;
+  const b = +$('bud').value || 0;
+  const sb = +$('sickBud').value || 0;
+  const idVal = $('individualId').value.trim();
+
+  let msgs = [];
+  if (!idVal) msgs.push('개체 ID를 직접 입력하세요.');
+  if (s > f) msgs.push('병든 과실 수가 조사 과실 수보다 큽니다.');
+  if (sb > b) msgs.push('병든 꽃봉오리 수가 조사 꽃봉오리 수보다 큽니다.');
+
+  const warnEl = $('validation');
+  if (msgs.length > 0) {
+    warnEl.style.display = 'block';
+    warnEl.innerHTML = '⚠️ ' + msgs.join('<br>⚠️ ');
+    return false;
+  } else {
+    warnEl.style.display = 'none';
+    warnEl.textContent = '';
+    return true;
+  }
+}
+
+// + / - 버튼 조작
+document.querySelectorAll('.num-control button').forEach(btn => {
+  btn.onclick = () => {
+    const input = $(btn.dataset.f);
+    const step = +btn.dataset.d;
+    const current = +input.value || 0;
+    input.value = Math.max(0, current + step);
+    validate();
+    saveCurrent();
+  };
+});
+
+// 인풋 값 변경 시 실시간 자동저장 및 검사
+fields.forEach(f => {
+  $(f).addEventListener('input', () => {
+    validate();
+    saveCurrent();
+  });
+});
+
+// 조사일자 변경 시 데이터 로드
+$('surveyDate').addEventListener('change', () => {
+  idx = 0;
+  show();
+  showStatus(`📅 조사일자가 <b>${$('surveyDate').value}</b>(으)로 변경되었습니다. 해당 날짜 데이터가 로드되었습니다.`);
+});
+
+// 이전 버튼
+$('prev').onclick = () => {
+  saveCurrent();
+  if (idx > 0) {
+    idx--;
+    show();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+};
+
+// 저장 + 다음 버튼
+$('next').onclick = () => {
+  if (!validate()) {
+    $('validation').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  saveCurrent();
+  if (idx < 29) {
+    idx++;
+    show();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    showStatus('<div style="color:var(--primary-dark); font-weight:800; font-size:16px;">🎉 마지막 30번째 개체까지 모두 도달했습니다.<br>[입력현황 보기]를 확인하신 후 [CSV 내보내기]를 실행하세요.</div>');
+  }
+};
+
+// CSV 내보내기 관련 이스케이프 및 생성
+function esc(v) {
+  v = String(v ?? '');
+  return '"' + v.replaceAll('"', '""') + '"';
+}
+
+function csvText() {
+  saveCurrent();
+  const data = loadAll();
+  const headers = ['개체ID', '조사 과실 수', '병든 과실 수', '조사 꽃봉오리 수', '병든 꽃봉오리 수', '발병률(%)', '비고'];
+  let lines = [headers.map(esc).join(',')];
+  
+  slots.forEach(slot => {
+    const r = data.rows[slot] || {};
+    lines.push([
+      r.individualId ?? '',
+      r.fruit ?? '',
+      r.sickFruit ?? '',
+      r.bud ?? '',
+      r.sickBud ?? '',
+      '', // 발병률 빈칸 유지
+      r.note ?? ''
+    ].map(esc).join(','));
+  });
+  return '\ufeff' + lines.join('\r\n');
+}
+
+function downloadFile(name, text, type) {
+  const blob = new Blob([text], { type });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+// CSV 다운로드 (파일명에 조사일자 포함: eggplant_survey_YYYY-MM-DD.csv)
+$('csv').onclick = () => {
+  const dateStr = $('surveyDate').value || getTodayString();
+  const filename = `eggplant_survey_${dateStr}.csv`;
+  downloadFile(filename, csvText(), 'text/csv;charset=utf-8');
+};
+
+// 백업 JSON 다운로드
+$('backup').onclick = () => {
+  saveCurrent();
+  const dateStr = $('surveyDate').value || getTodayString();
+  const filename = `eggplant_survey_backup_${dateStr}.json`;
+  downloadFile(filename, JSON.stringify(loadAll(), null, 2), 'application/json');
+};
+
+function showStatus(html) {
+  const box = $('statusBox');
+  box.style.display = 'block';
+  box.innerHTML = html;
+  box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// 입력 현황 보기
+$('list').onclick = () => {
+  saveCurrent();
+  const data = loadAll();
+  let doneCount = 0;
+  let rowsHtml = '';
+
+  slots.forEach((slot, i) => {
+    const r = data.rows[slot] || {};
+    const hasId = !!(r.individualId && r.individualId.trim());
+    const hasValues = [r.fruit, r.sickFruit, r.bud, r.sickBud].some(v => v !== undefined && v !== '');
+    const entered = hasId || hasValues;
+    if (entered) doneCount++;
+
+    rowsHtml += `
+      <div class="status-item">
+        <span class="${entered ? 'status-done' : 'status-yet'}">${entered ? '✓ 완료' : '○ 미입력'}</span>
+        <b>${i + 1}. [슬롯 ${slot}]</b> ID: <u>${r.individualId || '(미입력)'}</u><br>
+        <span style="font-size:13px; color:var(--text-muted); margin-left: 20px;">
+          과실: ${r.fruit ?? '-'} (병든: ${r.sickFruit ?? '-'}) | 꽃봉오리: ${r.bud ?? '-'} (병든: ${r.sickBud ?? '-'})
+          ${r.note ? ` | 비고: ${r.note}` : ''}
+        </span>
+      </div>`;
+  });
+
+  const dateStr = $('surveyDate').value;
+  showStatus(`
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <b style="font-size:16px;">📋 입력현황 (${dateStr})</b>
+      <span style="font-weight:800; color:var(--primary); font-size:15px;">진행도: ${doneCount} / 30</span>
+    </div>
+    <div style="border-top: 2px solid var(--border-strong); padding-top:6px;">
+      ${rowsHtml}
+    </div>
+  `);
+};
+
+// 오늘 데이터 초기화 (2단계 명확한 확인 절차)
+$('reset').onclick = () => {
+  const dateStr = $('surveyDate').value || getTodayString();
+  
+  // 1단계 확인
+  const confirm1 = confirm(`[1단계 확인]\n조사일자 [ ${dateStr} ] 의 모든 입력 데이터를 초기화하시겠습니까?`);
+  if (!confirm1) return;
+
+  // 2단계 최종 확인
+  const confirm2 = confirm(`🚨 [2단계 최종 확인]\n초기화 시 현재 날짜의 30개 개체 데이터가 완전히 삭제되며 복구할 수 없습니다.\n\n정말로 [ ${dateStr} ] 데이터를 초기화할까요?`);
+  if (!confirm2) return;
+
+  localStorage.removeItem(getStorageKey());
+  idx = 0;
+  show();
+  showStatus(`<div style="color:var(--danger); font-weight:800;">⚠️ ${dateStr} 조사 데이터가 모두 초기화되었습니다.</div>`);
+};
+
+// 초기 실행
+$('surveyDate').value = getTodayString();
+show();
+</script>
+</body>
+</html>
