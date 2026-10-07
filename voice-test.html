@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>음성 카운팅 테스트 (Voice Counting Test)</title>
+<title>음성 카운팅 반응속도 테스트 (Voice Counting Test V2)</title>
 <style>
 :root {
   --bg-dark: #0f172a;
@@ -23,9 +23,9 @@
   --box-c-border: #3b82f6;
   --box-c-highlight: #60a5fa;
 
-  --box-d-bg: #581c87;
-  --box-d-border: #a855f7;
-  --box-d-highlight: #c084fc;
+  --box-x-bg: #581c87;
+  --box-x-border: #a855f7;
+  --box-x-highlight: #c084fc;
 }
 
 * {
@@ -72,14 +72,47 @@ header {
   color: #38bdf8;
 }
 
+.top-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* FAST MODE 토글 스위치 */
+.mode-toggle-btn {
+  font-size: 12px;
+  font-weight: 900;
+  padding: 5px 9px;
+  border-radius: 20px;
+  border: 1px solid #eab308;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.mode-fast {
+  background: #ca8a04;
+  color: #ffffff;
+  border-color: #facc15;
+  box-shadow: 0 0 8px rgba(250, 204, 21, 0.4);
+}
+
+.mode-normal {
+  background: #334155;
+  color: #94a3b8;
+  border-color: #64748b;
+}
+
 .mic-badge {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
-  padding: 4px 10px;
+  padding: 5px 9px;
   border-radius: 20px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   border: 1px solid transparent;
 }
 
@@ -141,7 +174,7 @@ header {
 }
 
 .btn-reset {
-  flex: 0 0 60px;
+  flex: 0 0 55px;
   background: #475569;
   color: #f8fafc;
   font-size: 13px;
@@ -178,7 +211,7 @@ header {
   justify-content: space-between;
   padding: 10px;
   position: relative;
-  transition: transform 0.1s ease, box-shadow 0.1s ease, border-color 0.1s ease;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, border-color 0.08s ease;
   border: 3px solid;
 }
 
@@ -186,13 +219,13 @@ header {
 .card-a { background: var(--box-a-bg); border-color: var(--box-a-border); }
 .card-b { background: var(--box-b-bg); border-color: var(--box-b-border); }
 .card-c { background: var(--box-c-bg); border-color: var(--box-c-border); }
-.card-d { background: var(--box-d-bg); border-color: var(--box-d-border); }
+.card-x { background: var(--box-x-bg); border-color: var(--box-x-border); }
 
 /* 인식 시 플래시 효과 */
 .card-a.highlight { border-color: #ffffff; box-shadow: 0 0 25px var(--box-a-highlight); transform: scale(1.02); }
 .card-b.highlight { border-color: #ffffff; box-shadow: 0 0 25px var(--box-b-highlight); transform: scale(1.02); }
 .card-c.highlight { border-color: #ffffff; box-shadow: 0 0 25px var(--box-c-highlight); transform: scale(1.02); }
-.card-d.highlight { border-color: #ffffff; box-shadow: 0 0 25px var(--box-d-highlight); transform: scale(1.02); }
+.card-x.highlight { border-color: #ffffff; box-shadow: 0 0 25px var(--box-x-highlight); transform: scale(1.02); }
 
 .card-header {
   display: flex;
@@ -289,12 +322,17 @@ footer {
 </head>
 <body>
 
-<!-- 상단 헤더: 제목, 마이크 상태, 제어 버튼 -->
+<!-- 상단 헤더: 제목, 모드 스위치, 마이크 상태, 제어 버튼 -->
 <header>
   <div class="header-top">
     <div class="title">🎤 VOICE COUNTING TEST</div>
-    <div id="micStatus" class="mic-badge mic-off">
-      <span id="micDot">●</span> <span id="micText">OFF</span>
+    <div class="top-badges">
+      <button type="button" id="modeToggleBtn" class="mode-toggle-btn mode-fast">
+        <span id="modeIcon">⚡</span> <span id="modeText">FAST MODE ON</span>
+      </button>
+      <div id="micStatus" class="mic-badge mic-off">
+        <span id="micDot">●</span> <span id="micText">OFF</span>
+      </div>
     </div>
   </div>
 
@@ -305,7 +343,7 @@ footer {
   </div>
 
   <div class="recent-bar">
-    <span>음성명령: <b>A</b>(건강과실) · <b>B</b>(병든과실) · <b>C</b>(건강봉오리) · <b>D</b>(병든봉오리)</span>
+    <span>명령어: <b>A</b>(건강과실) <b>B</b>(병든과실) <b>C</b>(건강봉오리) <b>X</b>(병든봉오리)</span>
     <span>최근 인식: <span id="recentLog" class="recent-val">-</span></span>
   </div>
 </header>
@@ -351,16 +389,16 @@ footer {
     </div>
   </section>
 
-  <!-- D: 병든 봉오리 -->
-  <section class="count-card card-d" id="cardD">
+  <!-- X: 병든 봉오리 (기존 D에서 변경) -->
+  <section class="count-card card-x" id="cardX">
     <div class="card-header">
-      <span class="key-label">D</span>
+      <span class="key-label">X</span>
       <span class="name-label">병든 봉오리</span>
     </div>
-    <div class="count-num" id="numD">0</div>
+    <div class="count-num" id="numX">0</div>
     <div class="card-footer">
-      <button type="button" class="step-btn" data-target="D" data-delta="-1" aria-label="D 감소">−</button>
-      <button type="button" class="step-btn" data-target="D" data-delta="1" aria-label="D 증가">＋</button>
+      <button type="button" class="step-btn" data-target="X" data-delta="-1" aria-label="X 감소">−</button>
+      <button type="button" class="step-btn" data-target="X" data-delta="1" aria-label="X 증가">＋</button>
     </div>
   </section>
 </main>
@@ -372,17 +410,22 @@ footer {
     <div class="calc-val"><b id="totalFruit">0</b> 개</div>
   </div>
   <div class="calc-box">
-    <div class="calc-title">조사 봉오리 수 (C + D)</div>
+    <div class="calc-title">조사 봉오리 수 (C + X)</div>
     <div class="calc-val"><b id="totalBud">0</b> 개</div>
   </div>
 </footer>
 
 <script>
-// 카운터 상태 관리
-const counts = { A: 0, B: 0, C: 0, D: 0 };
+// 카운터 상태 관리 (A, B, C, X)
+const counts = { A: 0, B: 0, C: 0, X: 0 };
 let isUserListening = false;
+let isFastMode = true; // 기본값 FAST MODE (interim 기반 즉시 처리)
 let recognition = null;
 let restartTimeout = null;
+
+// 중복 방지(Deduplication)를 위한 세그먼트별 소비 토큰 개수 추적 맵
+// key: resultIndex (세그먼트 인덱스), value: 이미 카운트 반영된 토큰 개수
+const segmentConsumedCounts = {};
 
 const $ = id => document.getElementById(id);
 
@@ -391,10 +434,10 @@ function updateUI() {
   $('numA').textContent = counts.A;
   $('numB').textContent = counts.B;
   $('numC').textContent = counts.C;
-  $('numD').textContent = counts.D;
+  $('numX').textContent = counts.X;
 
   $('totalFruit').textContent = counts.A + counts.B;
-  $('totalBud').textContent = counts.C + counts.D;
+  $('totalBud').textContent = counts.C + counts.X;
 }
 
 // 카운트 증가 및 시각/진동 피드백
@@ -409,8 +452,10 @@ function triggerCount(key, amount = 1) {
   // 카드 하이라이트 애니메이션
   const card = $(`card${key}`);
   if (card) {
+    card.classList.remove('highlight');
+    void card.offsetWidth; // DOM reflow로 연속 트리거 시 애니메이션 재시작
     card.classList.add('highlight');
-    setTimeout(() => card.classList.remove('highlight'), 300);
+    setTimeout(() => card.classList.remove('highlight'), 250);
   }
 
   // 모바일 진동 피드백 (지원 브라우저)
@@ -437,9 +482,30 @@ $('resetBtn').onclick = () => {
     counts.A = 0;
     counts.B = 0;
     counts.C = 0;
-    counts.D = 0;
+    counts.X = 0;
     $('recentLog').textContent = '-';
+    for (const k in segmentConsumedCounts) delete segmentConsumedCounts[k];
     updateUI();
+  }
+};
+
+// FAST MODE 토글 기능
+$('modeToggleBtn').onclick = () => {
+  isFastMode = !isFastMode;
+  const btn = $('modeToggleBtn');
+  const icon = $('modeIcon');
+  const text = $('modeText');
+
+  if (isFastMode) {
+    btn.className = 'mode-toggle-btn mode-fast';
+    icon.textContent = '⚡';
+    text.textContent = 'FAST MODE ON';
+    $('recentLog').textContent = 'FAST 모드 전환 (실시간)';
+  } else {
+    btn.className = 'mode-toggle-btn mode-normal';
+    icon.textContent = '🐢';
+    text.textContent = 'NORMAL (침묵후)';
+    $('recentLog').textContent = 'NORMAL 모드 전환 (침묵대기)';
   }
 };
 
@@ -458,32 +524,40 @@ function updateMicUI(listening) {
   }
 }
 
-// 음성 명령 인식 매핑 로직
-// 한국어 환경에서 사용자가 A, B, C, D를 말했을 때의 다양한 인식 패턴 대응
+// 다중 발화 토큰 파싱 로직
+// "A A A C B X" 또는 "에이 에이 에이 씨 비 엑스" 등 순서대로 모든 명령어 추출
 function parseSpeechCommands(text) {
   const clean = text.toLowerCase().trim();
   const tokens = clean.split(/[\s,.]+/).filter(Boolean);
   const detected = [];
 
+  // 각 토큰별 매핑 정의
   const mapA = ['a', '에이', '애이', '예이', 'eh'];
   const mapB = ['b', '비', 'bee', '미'];
   const mapC = ['c', '씨', '시', 'see', 'sea'];
-  const mapD = ['d', '디', 'dee', '리'];
+  const mapX = ['x', '엑스', '액스', 'ex', 'eks', 'exes', '익스'];
 
   tokens.forEach(tok => {
     if (mapA.includes(tok)) detected.push('A');
     else if (mapB.includes(tok)) detected.push('B');
     else if (mapC.includes(tok)) detected.push('C');
-    else if (mapD.includes(tok)) detected.push('D');
+    else if (mapX.includes(tok)) detected.push('X');
+    else {
+      // 띄어쓰기 없이 붙여서 인식된 경우(예: '에이에이', 'aab', '엑스엑스') 서브패턴 스캔
+      let sub = tok;
+      while (sub.length > 0) {
+        if (sub.startsWith('에이') || sub.startsWith('애이')) { detected.push('A'); sub = sub.slice(2); }
+        else if (sub.startsWith('엑스') || sub.startsWith('액스')) { detected.push('X'); sub = sub.slice(2); }
+        else if (sub.startsWith('a')) { detected.push('A'); sub = sub.slice(1); }
+        else if (sub.startsWith('b')) { detected.push('B'); sub = sub.slice(1); }
+        else if (sub.startsWith('c')) { detected.push('C'); sub = sub.slice(1); }
+        else if (sub.startsWith('x')) { detected.push('X'); sub = sub.slice(1); }
+        else if (sub.startsWith('비')) { detected.push('B'); sub = sub.slice(1); }
+        else if (sub.startsWith('씨') || sub.startsWith('시')) { detected.push('C'); sub = sub.slice(1); }
+        else { break; }
+      }
+    }
   });
-
-  // 토큰 단위로 못 잡았으나 단일 글자 포함된 경우를 위한 폴백
-  if (detected.length === 0) {
-    if (clean === 'a' || clean === '에이') detected.push('A');
-    else if (clean === 'b' || clean === '비') detected.push('B');
-    else if (clean === 'c' || clean === '씨' || clean === '시') detected.push('C');
-    else if (clean === 'd' || clean === '디') detected.push('D');
-  }
 
   return detected;
 }
@@ -495,26 +569,46 @@ function initRecognition() {
   }
 
   const rec = new SpeechRecognition();
-  rec.lang = 'ko-KR'; // 한국어 모드 (에이, 비, 씨, 디 인식)
-  rec.continuous = true; // 연속 청취
-  rec.interimResults = false; // 확정된 결과만 처리하여 중복 카운팅 방지
-  rec.maxAlternatives = 3;
+  rec.lang = 'ko-KR'; // 한국어 모드
+  rec.continuous = true; // 연속 청취 모드
+  rec.interimResults = true; // FAST MODE를 위해 상시 interim 수신 활성화
+  rec.maxAlternatives = 1;
 
   rec.onstart = () => {
     updateMicUI(true);
   };
 
   rec.onresult = (event) => {
+    // resultIndex부터 현재 results 끝까지 순회
     for (let i = event.resultIndex; i < event.results.length; ++i) {
-      if (event.results[i].isFinal) {
-        const transcript = event.results[i][0].transcript;
-        const matched = parseSpeechCommands(transcript);
+      const res = event.results[i];
+      const isFinal = res.isFinal;
+      const transcript = res[0].transcript;
+      const parsedTokens = parseSpeechCommands(transcript);
+
+      if (isFastMode) {
+        // [FAST MODE]: interim 결과가 도착하는 즉시 신규 토큰만 카운트 (Deduplication)
+        const alreadyConsumed = segmentConsumedCounts[i] || 0;
         
-        if (matched.length > 0) {
-          matched.forEach(cmd => triggerCount(cmd, 1));
-        } else {
-          // 일치하지 않은 발화도 디버깅용으로 표시
-          $('recentLog').textContent = `미인식: "${transcript.trim()}"`;
+        if (parsedTokens.length > alreadyConsumed) {
+          // 아직 카운트되지 않은 새로운 토큰들만 슬라이스
+          const newTokens = parsedTokens.slice(alreadyConsumed);
+          newTokens.forEach(cmd => triggerCount(cmd, 1));
+          segmentConsumedCounts[i] = parsedTokens.length;
+        }
+
+        // 해당 세그먼트가 최종 완료(isFinal)되면 메모리 정리 및 확정
+        if (isFinal) {
+          segmentConsumedCounts[i] = Math.max(segmentConsumedCounts[i] || 0, parsedTokens.length);
+        }
+      } else {
+        // [NORMAL MODE (기존 방식)]: interim은 무시하고 isFinal 확정 시에만 1회 처리
+        if (isFinal) {
+          if (parsedTokens.length > 0) {
+            parsedTokens.forEach(cmd => triggerCount(cmd, 1));
+          } else {
+            $('recentLog').textContent = `미인식: "${transcript.trim()}"`;
+          }
         }
       }
     }
@@ -542,7 +636,7 @@ function initRecognition() {
             console.log('재시작 대기:', e);
           }
         }
-      }, 300);
+      }, 250);
     }
   };
 
@@ -556,10 +650,11 @@ $('startBtn').onclick = () => {
     if (!recognition) return;
   }
   isUserListening = true;
+  for (const k in segmentConsumedCounts) delete segmentConsumedCounts[k];
   try {
     recognition.start();
   } catch (e) {
-    // 이미 실행 중인 경우 무시
+    // 이미 실행 중인 경우
   }
 };
 
