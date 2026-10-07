@@ -2,458 +2,820 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>가지 병해충 현장조사 V3</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>가지 병해충 현장조사 V4 (GoPro 음성촬영 모드)</title>
 <style>
 :root {
-  --text-main: #0f172a;
-  --text-muted: #334155;
-  --bg-page: #f1f5f9;
-  --bg-card: #ffffff;
-  --border-strong: #1e293b;
-  --border-light: #94a3b8;
-  --primary: #15803d;
-  --primary-dark: #14532d;
-  --danger: #b91c1c;
-  --danger-bg: #fef2f2;
+  --bg-page: #0f172a;
+  --bg-card: #1e293b;
+  --bg-card-sub: #334155;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-strong: #475569;
+  
+  --primary: #16a34a;
+  --primary-dark: #15803d;
+  --danger: #dc2626;
+  --danger-dark: #b91c1c;
+
+  /* 4개 카운터 테마 */
+  --box-a-bg: #064e3b;
+  --box-a-border: #10b981;
+  --box-a-highlight: #34d399;
+
+  --box-b-bg: #7f1d1d;
+  --box-b-border: #ef4444;
+  --box-b-highlight: #f87171;
+
+  --box-c-bg: #1e3a8a;
+  --box-c-border: #3b82f6;
+  --box-c-highlight: #60a5fa;
+
+  --box-x-bg: #581c87;
+  --box-x-border: #a855f7;
+  --box-x-highlight: #c084fc;
 }
+
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
   -webkit-tap-highlight-color: transparent;
 }
+
 body {
-  margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", sans-serif;
+  background-color: var(--bg-page);
   color: var(--text-main);
-  background: var(--bg-page);
-  line-height: 1.4;
-  padding-bottom: 100px; /* 하단 고정 네비게이션 공간 확보 */
-  touch-action: manipulation;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  user-select: none;
 }
-.wrap {
-  max-width: 680px;
+
+/* 화면 뷰 제어 */
+.view {
+  display: none;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+}
+.view.active {
+  display: flex;
+}
+
+/* ==========================================
+   1. 준비 화면 (SETUP VIEW) 스타일
+   ========================================== */
+#viewSetup {
+  overflow-y: auto;
+  padding: 16px 14px calc(24px + env(safe-area-inset-bottom, 0px));
+  max-width: 600px;
   margin: 0 auto;
-  padding: 12px;
 }
+
+.setup-header {
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.setup-header h1 {
+  font-size: 20px;
+  font-weight: 900;
+  color: #38bdf8;
+  letter-spacing: -0.5px;
+}
+
+.setup-header p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
 .card {
   background: var(--bg-card);
   border: 2px solid var(--border-strong);
   border-radius: 16px;
-  padding: 16px;
+  padding: 18px 16px;
   margin-bottom: 14px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
 }
-h1 {
-  font-size: 20px;
+
+.form-group {
+  margin-bottom: 14px;
+}
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
   font-weight: 800;
-  margin: 0 0 10px;
-  color: var(--text-main);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.sub-info {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-muted);
-}
-/* 조사일자 설정 영역 */
-.date-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px dashed var(--border-light);
-}
-.date-row label {
-  font-size: 15px;
-  font-weight: 800;
-  white-space: nowrap;
-}
-.date-row input[type="date"] {
-  flex: 1;
-  max-width: 220px;
-  font-size: 16px;
-  font-weight: 700;
-  padding: 8px 12px;
-  border: 2px solid var(--border-strong);
-  border-radius: 10px;
-  background: #fff;
-  color: var(--text-main);
-}
-/* 상단 상태 바 */
-.top-status {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  color: #cbd5e1;
   margin-bottom: 6px;
 }
-.slot-badge {
-  font-size: 17px;
-  font-weight: 800;
-  color: var(--primary-dark);
-  background: #dcfce7;
-  padding: 4px 10px;
-  border-radius: 8px;
-  border: 1px solid #86efac;
-}
-.progress-text {
-  font-size: 16px;
-  font-weight: 800;
-  color: var(--text-main);
-}
-.bar {
-  height: 12px;
-  background: #cbd5e1;
-  border-radius: 6px;
-  overflow: hidden;
-  border: 1px solid var(--border-strong);
-}
-.bar i {
-  display: block;
-  height: 100%;
-  background: var(--primary);
-  width: 0;
-  transition: width 0.2s ease;
-}
-/* 입력 필드 */
-.field {
-  margin: 14px 0;
-}
-.field label {
-  display: block;
-  font-size: 15px;
-  font-weight: 800;
-  margin-bottom: 6px;
-  color: var(--text-main);
-}
-.field input, .field textarea {
+
+.form-group select, 
+.form-group input {
   width: 100%;
+  height: 52px;
   font-size: 18px;
-  font-weight: 700;
-  padding: 12px;
+  font-weight: 800;
+  padding: 0 14px;
   border: 2px solid var(--border-strong);
   border-radius: 12px;
-  background: #ffffff;
-  color: var(--text-main);
+  background: #0f172a;
+  color: #ffffff;
 }
-.field textarea {
-  font-size: 16px;
-  font-weight: 500;
-  min-height: 70px;
-  resize: vertical;
-}
-.field input:focus, .field textarea:focus {
+
+.form-group select:focus, 
+.form-group input:focus {
   outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.25);
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3);
 }
-.field input[readonly] {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-  color: #64748b;
+
+.form-group input[readonly] {
+  background: #1e293b;
+  color: #38bdf8;
+  border-color: #334155;
+  font-weight: 900;
 }
-/* 수량 입력 그리드 */
-.grid {
+
+.grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 10px;
 }
-@media (max-width: 380px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
-}
-/* + / - 버튼 컨트롤러 (장갑 및 한 손 터치 최적화) */
-.num-control {
-  display: grid;
-  grid-template-columns: 60px 1fr 60px;
-  gap: 6px;
-}
-.num-control button {
-  border: 2px solid var(--border-strong);
-  border-radius: 12px;
-  background: #e2e8f0;
-  color: var(--text-main);
-  font-size: 28px;
+
+/* 거대한 촬영 시작 버튼 */
+.btn-start-record {
+  width: 100%;
+  height: 68px;
+  border-radius: 16px;
+  border: none;
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 22px;
   font-weight: 900;
-  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   cursor: pointer;
-  box-shadow: 0 2px 0 var(--border-strong);
+  box-shadow: 0 6px 0 var(--primary-dark), 0 8px 16px rgba(22, 163, 74, 0.4);
+  margin-top: 8px;
+  transition: transform 0.08s ease;
 }
-.num-control button:active {
-  background: #cbd5e1;
-  transform: translateY(2px);
+
+.btn-start-record:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 var(--primary-dark);
+}
+
+/* 준비화면 하단 조사현황 및 CSV 도구 */
+.setup-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #1e293b;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  border: 1px solid var(--border-strong);
+  margin-top: 6px;
+}
+
+.btn-csv {
+  background: #334155;
+  color: #f8fafc;
+  border: 1px solid #64748b;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* ==========================================
+   2. 촬영 모드 (RECORDING VIEW) 스타일
+   ========================================== */
+#viewRecord {
+  padding: env(safe-area-inset-top, 6px) env(safe-area-inset-right, 6px) env(safe-area-inset-bottom, 6px) env(safe-area-inset-left, 6px);
+  background: #020617;
+}
+
+/* 상단 미니 정보 바 */
+.rec-top-bar {
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #334155;
+}
+
+.rec-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rec-badge-line {
+  font-size: 16px;
+  font-weight: 900;
+  color: #38bdf8;
+  letter-spacing: 0.5px;
+}
+
+.rec-farmer-line {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.rec-mic-status {
+  background: #166534;
+  color: #ffffff;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #22c55e;
+  animation: pulse-mic 1.5s infinite;
+}
+
+@keyframes pulse-mic {
+  0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+  70% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+/* 2 x 2 카운터 그리드 */
+.rec-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.counter-card {
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10px;
+  border: 3px solid;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.card-a { background: var(--box-a-bg); border-color: var(--box-a-border); }
+.card-b { background: var(--box-b-bg); border-color: var(--box-b-border); }
+.card-c { background: var(--box-c-bg); border-color: var(--box-c-border); }
+.card-x { background: var(--box-x-bg); border-color: var(--box-x-border); }
+
+/* 음성 인식 성공 시 플래시 하이라이트 */
+.card-a.highlight { border-color: #ffffff; box-shadow: 0 0 24px var(--box-a-highlight); transform: scale(1.02); }
+.card-b.highlight { border-color: #ffffff; box-shadow: 0 0 24px var(--box-b-highlight); transform: scale(1.02); }
+.card-c.highlight { border-color: #ffffff; box-shadow: 0 0 24px var(--box-c-highlight); transform: scale(1.02); }
+.card-x.highlight { border-color: #ffffff; box-shadow: 0 0 24px var(--box-x-highlight); transform: scale(1.02); }
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.key-tag {
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.key-name {
+  font-size: 13px;
+  font-weight: 700;
+  opacity: 0.9;
+  text-align: right;
+  line-height: 1.2;
+}
+
+.big-number {
+  font-size: clamp(52px, 14vw, 86px);
+  font-weight: 900;
+  text-align: center;
+  line-height: 1;
+  color: #ffffff;
+  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
+  margin: auto 0;
+}
+
+.card-step-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.btn-mini-step {
+  width: 44px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-mini-step:active {
+  background: rgba(255, 255, 255, 0.5);
+  transform: scale(0.95);
+}
+
+/* 하단 계산 바 및 거대한 촬영 종료 버튼 */
+.rec-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rec-totals-bar {
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 8px 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  border: 1px solid #334155;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.total-item {
+  color: var(--text-muted);
+}
+.total-item b {
+  color: #38bdf8;
+  font-size: 16px;
+}
+
+.btn-stop-record {
+  width: 100%;
+  height: 64px;
+  border-radius: 16px;
+  border: none;
+  background: var(--danger);
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 var(--danger-dark);
+}
+
+.btn-stop-record:active {
+  transform: translateY(3px);
   box-shadow: none;
 }
-.num-control input {
-  text-align: center;
-  font-size: 24px;
-  font-weight: 800;
-  border: 2px solid var(--border-strong);
-  border-radius: 12px;
-  padding: 0;
-  height: 60px;
-}
-/* 숫자 인풋 기본 스피너 제거 */
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
-  -webkit-appearance: none; 
-  margin: 0; 
-}
-input[type=number] {
-  -moz-appearance: textfield;
-}
-/* 유효성 검사 안내 메시지 */
-.warn-box {
-  display: none;
-  background: var(--danger-bg);
-  color: var(--danger);
-  border: 2px solid var(--danger);
-  border-radius: 10px;
-  padding: 10px 12px;
-  font-weight: 800;
-  font-size: 14px;
-  margin: 12px 0;
-}
-/* 하단 고정 네비게이션 (한 손 엄지 터치 최적화) */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #ffffff;
-  border-top: 2px solid var(--border-strong);
-  padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.12);
-  z-index: 1000;
-}
-.bottom-nav-inner {
-  max-width: 680px;
+
+/* ==========================================
+   3. 확인 화면 (CONFIRM VIEW) 스타일
+   ========================================== */
+#viewConfirm {
+  overflow-y: auto;
+  padding: 16px 14px calc(24px + env(safe-area-inset-bottom, 0px));
+  max-width: 600px;
   margin: 0 auto;
+}
+
+.confirm-header {
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.confirm-header h2 {
+  font-size: 20px;
+  font-weight: 900;
+  color: #facc15;
+}
+
+.info-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.info-table td {
+  padding: 6px 0;
+  border-bottom: 1px solid #334155;
+}
+
+.info-table td.label {
+  font-weight: 700;
+  color: var(--text-muted);
+  width: 90px;
+}
+
+.info-table td.val {
+  font-weight: 900;
+  color: #ffffff;
+  font-size: 15px;
+}
+
+/* 확인 화면 카운터 수정 리스트 */
+.confirm-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.confirm-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 2px solid;
+}
+
+.confirm-row.item-a { background: rgba(6, 78, 59, 0.3); border-color: var(--box-a-border); }
+.confirm-row.item-b { background: rgba(127, 29, 29, 0.3); border-color: var(--box-b-border); }
+.confirm-row.item-c { background: rgba(30, 58, 138, 0.3); border-color: var(--box-c-border); }
+.confirm-row.item-x { background: rgba(88, 28, 135, 0.3); border-color: var(--box-x-border); }
+
+.item-desc b {
+  font-size: 18px;
+  margin-right: 6px;
+}
+.item-desc span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.item-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.item-val {
+  font-size: 24px;
+  font-weight: 900;
+  min-width: 36px;
+  text-align: center;
+}
+
+.btn-confirm-step {
+  width: 40px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--border-strong);
+  background: #334155;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 900;
+  cursor: pointer;
+}
+.btn-confirm-step:active {
+  background: #475569;
+}
+
+.confirm-totals-box {
+  background: #0f172a;
+  border: 2px solid #334155;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 14px;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.confirm-totals-box div {
+  margin: 4px 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.note-input {
+  width: 100%;
+  height: 60px;
+  background: #0f172a;
+  border: 2px solid var(--border-strong);
+  border-radius: 10px;
+  padding: 10px;
+  color: #fff;
+  font-size: 15px;
+  resize: none;
+  margin-top: 6px;
+}
+
+/* 확인 화면 버튼 그룹 */
+.confirm-actions {
   display: grid;
   grid-template-columns: 1fr 1.6fr;
   gap: 10px;
-}
-.bottom-nav button {
-  border: 2px solid var(--border-strong);
-  border-radius: 14px;
-  height: 56px;
-  font-size: 18px;
-  font-weight: 800;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.btn-prev {
-  background: #e2e8f0;
-  color: var(--text-main);
-  box-shadow: 0 3px 0 var(--border-strong);
-}
-.btn-next {
-  background: var(--primary);
-  color: #ffffff;
-  font-size: 20px;
-  border-color: var(--primary-dark);
-  box-shadow: 0 3px 0 var(--primary-dark);
-}
-.bottom-nav button:active {
-  transform: translateY(2px);
-  box-shadow: none;
-}
-/* 보조 액션 버튼 영역 */
-.action-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-.action-grid button {
-  border: 2px solid var(--border-strong);
-  border-radius: 12px;
-  background: #f8fafc;
-  color: var(--text-main);
-  font-size: 15px;
-  font-weight: 800;
-  padding: 14px 8px;
-  cursor: pointer;
-  box-shadow: 0 2px 0 var(--border-strong);
-}
-.action-grid button:active {
-  transform: translateY(2px);
-  box-shadow: none;
-}
-/* 위험 영역 (초기화) 분리 */
-.danger-card {
-  border-color: #f87171;
-  background: #fffafa;
-  margin-top: 20px;
-}
-.danger-card summary {
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--danger);
-  cursor: pointer;
-  padding: 4px 0;
-}
-.btn-reset {
   margin-top: 10px;
-  width: 100%;
-  border: 2px solid var(--danger);
-  border-radius: 12px;
-  background: #fee2e2;
-  color: var(--danger);
+}
+
+.btn-back-rec {
+  height: 58px;
+  border-radius: 14px;
+  border: 2px solid var(--border-strong);
+  background: #334155;
+  color: #ffffff;
   font-size: 16px;
   font-weight: 800;
-  padding: 12px;
   cursor: pointer;
 }
-.btn-reset:active {
-  background: #fca5a5;
+
+.btn-confirm-save {
+  height: 58px;
+  border-radius: 14px;
+  border: none;
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 19px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 4px 0 var(--primary-dark);
 }
-/* 상태 및 입력현황 박스 */
-#statusBox {
-  font-size: 14px;
-  max-height: 380px;
-  overflow-y: auto;
-  border: 2px solid var(--border-strong);
-}
-.status-item {
-  padding: 6px 0;
-  border-bottom: 1px solid #e2e8f0;
-}
-.status-item:last-child {
-  border-bottom: none;
-}
-.status-done {
-  color: var(--primary);
-  font-weight: 800;
-}
-.status-yet {
-  color: #94a3b8;
-  font-weight: 700;
+.btn-confirm-save:active {
+  transform: translateY(3px);
+  box-shadow: none;
 }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <!-- 상단 카드: 제목 및 조사일자 설정 -->
+
+<!-- ==========================================
+     1. 준비 화면 (SETUP VIEW)
+     ========================================== -->
+<div id="viewSetup" class="view active">
+  <div class="setup-header">
+    <h1>🍆 가지 병해충 현장조사 V4</h1>
+    <p>GoPro 촬영 연동 · FAST MODE 음성 카운팅</p>
+  </div>
+
   <div class="card">
-    <h1>🍆 가지 병해충 현장조사 V3</h1>
-    <div class="sub-info">3구역 × 10개체 (총 30개 고정) · 개체 ID 직접입력</div>
-    <div class="date-row">
-      <label for="surveyDate">📅 조사일자</label>
-      <input type="date" id="surveyDate">
+    <div class="form-group">
+      <label for="setupDate">📅 조사일자</label>
+      <input type="date" id="setupDate">
     </div>
+
+    <div class="grid-2 form-group">
+      <div>
+        <label for="researcherId">👤 조사자</label>
+        <select id="researcherId">
+          <option value="R1">R1</option>
+          <option value="R2">R2</option>
+          <option value="R3">R3</option>
+          <option value="R4">R4</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="farmId">🏡 농가번호</label>
+        <select id="farmId">
+          <option value="G1">G1</option>
+          <option value="G2">G2</option>
+          <option value="G3">G3</option>
+          <option value="G4">G4</option>
+          <option value="G5">G5</option>
+          <option value="G6">G6</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="farmerName">👨‍🌾 농장주 (자동 표시)</label>
+      <input id="farmerName" type="text" readonly>
+    </div>
+
+    <div class="form-group">
+      <label for="individualId">🏷️ 개체 ID (직접 입력) <span style="color:var(--danger)">*</span></label>
+      <input id="individualId" type="text" placeholder="예: 1-1, 1-2, 2-5" autocomplete="off" autofocus>
+    </div>
+
+    <button type="button" id="btnStartRecording" class="btn-start-record">
+      ▶ 촬영 시작 (음성 활성화)
+    </button>
   </div>
 
-  <!-- 입력 폼 카드 -->
-  <div class="card">
-    <div class="top-status">
-      <div class="slot-badge" id="slotBadge">슬롯 1-1</div>
-      <div class="progress-text" id="progress">1 / 30</div>
+  <div class="setup-summary">
+    <div>
+      오늘 조사된 개체: <b id="todayCount" style="color:#38bdf8; font-size:16px;">0</b>개
     </div>
-    <div class="bar"><i id="bar"></i></div>
-
-    <div class="field" style="margin-top: 16px;">
-      <label for="individualId">개체 ID <span style="color:var(--danger)">*</span></label>
-      <input id="individualId" placeholder="예: 1-1 (조사자 직접 입력)" autocomplete="off">
-    </div>
-
-    <div class="grid">
-      <div class="field">
-        <label for="fruit">조사 과실 수</label>
-        <div class="num-control">
-          <button type="button" data-f="fruit" data-d="-1" aria-label="조사 과실 수 감소">−</button>
-          <input id="fruit" type="number" min="0" inputmode="numeric" pattern="[0-9]*">
-          <button type="button" data-f="fruit" data-d="1" aria-label="조사 과실 수 증가">＋</button>
-        </div>
-      </div>
-      <div class="field">
-        <label for="sickFruit">병든 과실 수</label>
-        <div class="num-control">
-          <button type="button" data-f="sickFruit" data-d="-1" aria-label="병든 과실 수 감소">−</button>
-          <input id="sickFruit" type="number" min="0" inputmode="numeric" pattern="[0-9]*">
-          <button type="button" data-f="sickFruit" data-d="1" aria-label="병든 과실 수 증가">＋</button>
-        </div>
-      </div>
-      <div class="field">
-        <label for="bud">조사 꽃봉오리 수</label>
-        <div class="num-control">
-          <button type="button" data-f="bud" data-d="-1" aria-label="조사 꽃봉오리 수 감소">−</button>
-          <input id="bud" type="number" min="0" inputmode="numeric" pattern="[0-9]*">
-          <button type="button" data-f="bud" data-d="1" aria-label="조사 꽃봉오리 수 증가">＋</button>
-        </div>
-      </div>
-      <div class="field">
-        <label for="sickBud">병든 꽃봉오리 수</label>
-        <div class="num-control">
-          <button type="button" data-f="sickBud" data-d="-1" aria-label="병든 꽃봉오리 수 감소">−</button>
-          <input id="sickBud" type="number" min="0" inputmode="numeric" pattern="[0-9]*">
-          <button type="button" data-f="sickBud" data-d="1" aria-label="병든 꽃봉오리 수 증가">＋</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="field">
-      <label for="rate">발병률(%)</label>
-      <input id="rate" value="" readonly placeholder="빈칸 (기존 형식 유지)">
-    </div>
-
-    <div class="field">
-      <label for="note">비고</label>
-      <textarea id="note" placeholder="필요한 경우만 입력 (스마트폰 음성입력 가능)"></textarea>
-    </div>
-
-    <div id="validation" class="warn-box"></div>
+    <button type="button" id="btnExportCsv" class="btn-csv">📥 CSV 내보내기</button>
   </div>
-
-  <!-- 관리 및 내보내기 액션 카드 -->
-  <div class="card action-grid">
-    <button type="button" id="list">📋 입력현황 보기</button>
-    <button type="button" id="csv">📥 CSV 내보내기</button>
-    <button type="button" id="backup" style="grid-column: span 2;">💾 백업 JSON 다운로드</button>
-  </div>
-
-  <!-- 현황 출력 영역 -->
-  <div class="card" id="statusBox" style="display:none"></div>
-
-  <!-- 데이터 초기화 위험 구역 (실수 방지용 접이식 분리) -->
-  <details class="card danger-card">
-    <summary>⚠️ 현재 조사일자 데이터 초기화 (주의)</summary>
-    <div style="font-size: 13px; color: var(--danger); margin-top: 8px; font-weight: 600;">
-      선택된 조사일자의 30개 개체 데이터가 모두 지워집니다. 필요한 경우 사전에 'CSV 내보내기' 또는 '백업 JSON'을 받아두세요.
-    </div>
-    <button type="button" class="btn-reset" id="reset">현재 날짜 데이터 전체 초기화</button>
-  </details>
 </div>
 
-<!-- 화면 하단 고정 네비게이션 바 (한 손 조작 최적화) -->
-<div class="bottom-nav">
-  <div class="bottom-nav-inner">
-    <button type="button" id="prev" class="btn-prev">← 이전</button>
-    <button type="button" id="next" class="btn-next">저장 + 다음 →</button>
+<!-- ==========================================
+     2. 촬영 모드 (RECORDING VIEW)
+     ========================================== -->
+<div id="viewRecord" class="view">
+  <!-- 상단 미니 바 -->
+  <div class="rec-top-bar">
+    <div class="rec-meta">
+      <div class="rec-badge-line" id="recBadgeLine">R1 | G1 | 1-1</div>
+      <div class="rec-farmer-line">농장주: <span id="recFarmerLine">윤종우</span></div>
+    </div>
+    <div class="rec-mic-status">
+      <span>🎙</span> <span>LISTENING</span>
+    </div>
+  </div>
+
+  <!-- 2 x 2 카운터 그리드 -->
+  <main class="rec-grid">
+    <!-- A: 건강한 과실 -->
+    <section class="counter-card card-a" id="cardA">
+      <div class="card-top">
+        <span class="key-tag">A</span>
+        <span class="key-name">건강한 과실</span>
+      </div>
+      <div class="big-number" id="numA">0</div>
+      <div class="card-step-row">
+        <button type="button" class="btn-mini-step" data-target="A" data-delta="-1" aria-label="A 감소">−</button>
+        <button type="button" class="btn-mini-step" data-target="A" data-delta="1" aria-label="A 증가">＋</button>
+      </div>
+    </section>
+
+    <!-- B: 병든 과실 -->
+    <section class="counter-card card-b" id="cardB">
+      <div class="card-top">
+        <span class="key-tag">B</span>
+        <span class="key-name">병든 과실</span>
+      </div>
+      <div class="big-number" id="numB">0</div>
+      <div class="card-step-row">
+        <button type="button" class="btn-mini-step" data-target="B" data-delta="-1" aria-label="B 감소">−</button>
+        <button type="button" class="btn-mini-step" data-target="B" data-delta="1" aria-label="B 증가">＋</button>
+      </div>
+    </section>
+
+    <!-- C: 건강한 봉오리 -->
+    <section class="counter-card card-c" id="cardC">
+      <div class="card-top">
+        <span class="key-tag">C</span>
+        <span class="key-name">건강한 봉오리</span>
+      </div>
+      <div class="big-number" id="numC">0</div>
+      <div class="card-step-row">
+        <button type="button" class="btn-mini-step" data-target="C" data-delta="-1" aria-label="C 감소">−</button>
+        <button type="button" class="btn-mini-step" data-target="C" data-delta="1" aria-label="C 증가">＋</button>
+      </div>
+    </section>
+
+    <!-- X: 병든 봉오리 -->
+    <section class="counter-card card-x" id="cardX">
+      <div class="card-top">
+        <span class="key-tag">X</span>
+        <span class="key-name">병든 봉오리</span>
+      </div>
+      <div class="big-number" id="numX">0</div>
+      <div class="card-step-row">
+        <button type="button" class="btn-mini-step" data-target="X" data-delta="-1" aria-label="X 감소">−</button>
+        <button type="button" class="btn-mini-step" data-target="X" data-delta="1" aria-label="X 증가">＋</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- 하단 계산 바 및 촬영 종료 버튼 -->
+  <div class="rec-footer">
+    <div class="rec-totals-bar">
+      <div class="total-item">과실 (A+B): <b id="recTotalFruit">0</b>개</div>
+      <div class="total-item">봉오리 (C+X): <b id="recTotalBud">0</b>개</div>
+    </div>
+    <button type="button" id="btnStopRecording" class="btn-stop-record">
+      ■ 촬영 종료
+    </button>
+  </div>
+</div>
+
+<!-- ==========================================
+     3. 확인 화면 (CONFIRM VIEW)
+     ========================================== -->
+<div id="viewConfirm" class="view">
+  <div class="confirm-header">
+    <h2>📋 개체 조사 결과 확인</h2>
+  </div>
+
+  <div class="card">
+    <table class="info-table">
+      <tr><td class="label">조사일자</td><td class="val" id="cfmDate">-</td></tr>
+      <tr><td class="label">조사자</td><td class="val" id="cfmResearcher">-</td></tr>
+      <tr><td class="label">농가 / 농장주</td><td class="val" id="cfmFarm">-</td></tr>
+      <tr><td class="label">개체 ID</td><td class="val" id="cfmIndividualId" style="color:#facc15; font-size:18px;">-</td></tr>
+    </table>
+
+    <div class="confirm-items">
+      <div class="confirm-row item-a">
+        <div class="item-desc"><b>A</b><span>건강한 과실</span></div>
+        <div class="item-control">
+          <button type="button" class="btn-confirm-step" data-target="A" data-delta="-1">−</button>
+          <span class="item-val" id="cfmValA">0</span>
+          <button type="button" class="btn-confirm-step" data-target="A" data-delta="1">＋</button>
+        </div>
+      </div>
+
+      <div class="confirm-row item-b">
+        <div class="item-desc"><b>B</b><span>병든 과실</span></div>
+        <div class="item-control">
+          <button type="button" class="btn-confirm-step" data-target="B" data-delta="-1">−</button>
+          <span class="item-val" id="cfmValB">0</span>
+          <button type="button" class="btn-confirm-step" data-target="B" data-delta="1">＋</button>
+        </div>
+      </div>
+
+      <div class="confirm-row item-c">
+        <div class="item-desc"><b>C</b><span>건강한 봉오리</span></div>
+        <div class="item-control">
+          <button type="button" class="btn-confirm-step" data-target="C" data-delta="-1">−</button>
+          <span class="item-val" id="cfmValC">0</span>
+          <button type="button" class="btn-confirm-step" data-target="C" data-delta="1">＋</button>
+        </div>
+      </div>
+
+      <div class="confirm-row item-x">
+        <div class="item-desc"><b>X</b><span>병든 봉오리</span></div>
+        <div class="item-control">
+          <button type="button" class="btn-confirm-step" data-target="X" data-delta="-1">−</button>
+          <span class="item-val" id="cfmValX">0</span>
+          <button type="button" class="btn-confirm-step" data-target="X" data-delta="1">＋</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="confirm-totals-box">
+      <div><span>조사 과실 수 (A + B):</span> <span id="cfmTotalFruit" style="color:#38bdf8;">0 개</span></div>
+      <div><span>조사 봉오리 수 (C + X):</span> <span id="cfmTotalBud" style="color:#38bdf8;">0 개</span></div>
+    </div>
+
+    <div class="form-group">
+      <label for="cfmNote">비고 (필요 시 특이사항 기재)</label>
+      <textarea id="cfmNote" class="note-input" placeholder="음성 메모 또는 특이사항"></textarea>
+    </div>
+
+    <div class="confirm-actions">
+      <button type="button" id="btnBackToRecord" class="btn-back-rec">↩ 촬영으로 복귀</button>
+      <button type="button" id="btnConfirmSave" class="btn-confirm-save">✓ 확정 · 저장</button>
+    </div>
   </div>
 </div>
 
 <script>
-// 1. 고정 30개 조사 슬롯 생성 (3구역 x 10개체)
-const slots = [];
-for (let z = 1; z <= 3; z++) {
-  for (let n = 1; n <= 10; n++) {
-    slots.push(`${z}-${n}`);
-  }
-}
-const fields = ['individualId', 'fruit', 'sickFruit', 'bud', 'sickBud', 'note'];
-let idx = 0;
+// ==========================================
+// 1. 상수 매핑 및 상태 관리
+// ==========================================
+const FARM_OWNERS = {
+  G1: '윤종우',
+  G2: '안철우',
+  G3: '손범식',
+  G4: '전충호',
+  G5: '최종건',
+  G6: '박기환'
+};
+
+// 현재 조사 중인 개체 세션 데이터
+const sessionData = {
+  surveyDate: '',
+  researcherId: 'R1',
+  farmId: 'G1',
+  farmerName: '윤종우',
+  individualId: '',
+  counts: { A: 0, B: 0, C: 0, X: 0 },
+  note: ''
+};
+
+// 음성인식 및 Wake Lock 상태
+let isRecording = false;
+let recognition = null;
+let restartTimeout = null;
+let wakeLock = null;
+const segmentConsumedCounts = {};
+
 const $ = id => document.getElementById(id);
 
-// 로컬 날짜(YYYY-MM-DD) 반환 함수
+// 로컬 날짜(YYYY-MM-DD) 반환
 function getTodayString() {
   const now = new Date();
   const y = now.getFullYear();
@@ -462,239 +824,443 @@ function getTodayString() {
   return `${y}-${m}-${d}`;
 }
 
-// 2. 조사일자별 로컬스토리지 키 생성
-function getStorageKey() {
-  const dateVal = $('surveyDate').value || getTodayString();
-  return `eggplantSurveyV3_${dateVal}`;
+// 화면 전환 함수
+function switchView(viewName) {
+  $('viewSetup').classList.remove('active');
+  $('viewRecord').classList.remove('active');
+  $('viewConfirm').classList.remove('active');
+
+  if (viewName === 'setup') $('viewSetup').classList.add('active');
+  else if (viewName === 'record') $('viewRecord').classList.add('active');
+  else if (viewName === 'confirm') $('viewConfirm').classList.add('active');
 }
 
-function loadAll() {
+// ==========================================
+// 2. LocalStorage 데이터 저장 및 중복 방지
+// ==========================================
+const STORAGE_KEY_V4 = 'eggplantSurveyV4_records';
+
+function loadAllRecords() {
   try {
-    return JSON.parse(localStorage.getItem(getStorageKey()) || '{"rows":{}}');
+    return JSON.parse(localStorage.getItem(STORAGE_KEY_V4) || '[]');
   } catch (e) {
-    return { rows: {} };
+    return [];
   }
 }
 
-function saveAll(data) {
-  localStorage.setItem(getStorageKey(), JSON.stringify(data));
-}
+function saveRecord(record) {
+  const records = loadAllRecords();
+  // 동일한 날짜 + 농가번호 + 개체ID 레코드가 있으면 덮어쓰기/갱신, 없으면 신규 추가
+  const idx = records.findIndex(r => 
+    r.surveyDate === record.surveyDate && 
+    r.farmId === record.farmId && 
+    r.individualId === record.individualId
+  );
 
-function saveCurrent() {
-  const data = loadAll();
-  const slot = slots[idx];
-  const row = {};
-  fields.forEach(f => row[f] = $(f).value);
-  data.rows[slot] = row;
-  saveAll(data);
-}
-
-// 화면 갱신
-function show() {
-  const data = loadAll();
-  const row = data.rows[slots[idx]] || {};
-  fields.forEach(f => $(f).value = row[f] ?? '');
-  $('rate').value = ''; // 발병률 빈칸 유지
-  $('slotBadge').textContent = `슬롯 ${slots[idx]}`;
-  $('progress').textContent = `${idx + 1} / 30`;
-  $('bar').style.width = `${((idx + 1) / 30) * 100}%`;
-  validate();
-}
-
-// 유효성 검사 (개체 ID 필수, 병든 수량 <= 조사 수량)
-function validate() {
-  const f = +$('fruit').value || 0;
-  const s = +$('sickFruit').value || 0;
-  const b = +$('bud').value || 0;
-  const sb = +$('sickBud').value || 0;
-  const idVal = $('individualId').value.trim();
-
-  let msgs = [];
-  if (!idVal) msgs.push('개체 ID를 직접 입력하세요.');
-  if (s > f) msgs.push('병든 과실 수가 조사 과실 수보다 큽니다.');
-  if (sb > b) msgs.push('병든 꽃봉오리 수가 조사 꽃봉오리 수보다 큽니다.');
-
-  const warnEl = $('validation');
-  if (msgs.length > 0) {
-    warnEl.style.display = 'block';
-    warnEl.innerHTML = '⚠️ ' + msgs.join('<br>⚠️ ');
-    return false;
+  if (idx >= 0) {
+    records[idx] = record;
   } else {
-    warnEl.style.display = 'none';
-    warnEl.textContent = '';
-    return true;
+    records.push(record);
+  }
+  localStorage.setItem(STORAGE_KEY_V4, JSON.stringify(records));
+  updateTodayCountUI();
+}
+
+function isDuplicateRecord(date, farmId, indId) {
+  const records = loadAllRecords();
+  return records.some(r => 
+    r.surveyDate === date && 
+    r.farmId === farmId && 
+    r.individualId === indId
+  );
+}
+
+function updateTodayCountUI() {
+  const records = loadAllRecords();
+  const curDate = $('setupDate').value || getTodayString();
+  const todayRecords = records.filter(r => r.surveyDate === curDate);
+  $('todayCount').textContent = todayRecords.length;
+}
+
+// ==========================================
+// 3. Screen Wake Lock 관리
+// ==========================================
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+    }
+  } catch (err) {
+    console.log('Wake Lock request error:', err);
   }
 }
 
-// + / - 버튼 조작
-document.querySelectorAll('.num-control button').forEach(btn => {
-  btn.onclick = () => {
-    const input = $(btn.dataset.f);
-    const step = +btn.dataset.d;
-    const current = +input.value || 0;
-    input.value = Math.max(0, current + step);
-    validate();
-    saveCurrent();
+async function releaseWakeLock() {
+  try {
+    if (wakeLock) {
+      await wakeLock.release();
+      wakeLock = null;
+    }
+  } catch (err) {
+    console.log('Wake Lock release error:', err);
+  }
+}
+
+// ==========================================
+// 4. voice-test.html 검증 FAST MODE 음성 인식
+// ==========================================
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+function parseSpeechCommands(text) {
+  const clean = text.toLowerCase().trim();
+  const tokens = clean.split(/[\s,.]+/).filter(Boolean);
+  const detected = [];
+
+  const mapA = ['a', '에이', '애이', '예이', 'eh'];
+  const mapB = ['b', '비', 'bee', '미'];
+  const mapC = ['c', '씨', '시', 'see', 'sea'];
+  const mapX = ['x', '엑스', '액스', 'ex', 'eks', 'exes', '익스'];
+
+  tokens.forEach(tok => {
+    if (mapA.includes(tok)) detected.push('A');
+    else if (mapB.includes(tok)) detected.push('B');
+    else if (mapC.includes(tok)) detected.push('C');
+    else if (mapX.includes(tok)) detected.push('X');
+    else {
+      let sub = tok;
+      while (sub.length > 0) {
+        if (sub.startsWith('에이') || sub.startsWith('애이')) { detected.push('A'); sub = sub.slice(2); }
+        else if (sub.startsWith('엑스') || sub.startsWith('액스')) { detected.push('X'); sub = sub.slice(2); }
+        else if (sub.startsWith('a')) { detected.push('A'); sub = sub.slice(1); }
+        else if (sub.startsWith('b')) { detected.push('B'); sub = sub.slice(1); }
+        else if (sub.startsWith('c')) { detected.push('C'); sub = sub.slice(1); }
+        else if (sub.startsWith('x')) { detected.push('X'); sub = sub.slice(1); }
+        else if (sub.startsWith('비')) { detected.push('B'); sub = sub.slice(1); }
+        else if (sub.startsWith('씨') || sub.startsWith('시')) { detected.push('C'); sub = sub.slice(1); }
+        else { break; }
+      }
+    }
+  });
+
+  return detected;
+}
+
+function initRecognition() {
+  if (!SpeechRecognition) {
+    alert('이 브라우저는 음성 인식을 지원하지 않습니다. Android Chrome 또는 iOS Safari를 권장합니다.');
+    return null;
+  }
+
+  const rec = new SpeechRecognition();
+  rec.lang = 'ko-KR';
+  rec.continuous = true;
+  rec.interimResults = true; // FAST MODE 활성화
+  rec.maxAlternatives = 1;
+
+  rec.onresult = (event) => {
+    if (!isRecording) return;
+    for (let i = event.resultIndex; i < event.results.length; ++i) {
+      const res = event.results[i];
+      const isFinal = res.isFinal;
+      const transcript = res[0].transcript;
+      const parsedTokens = parseSpeechCommands(transcript);
+
+      const alreadyConsumed = segmentConsumedCounts[i] || 0;
+      if (parsedTokens.length > alreadyConsumed) {
+        const newTokens = parsedTokens.slice(alreadyConsumed);
+        newTokens.forEach(cmd => triggerCount(cmd, 1));
+        segmentConsumedCounts[i] = parsedTokens.length;
+      }
+
+      if (isFinal) {
+        segmentConsumedCounts[i] = Math.max(segmentConsumedCounts[i] || 0, parsedTokens.length);
+      }
+    }
+  };
+
+  rec.onerror = (event) => {
+    console.warn('Speech recognition error:', event.error);
+    if (event.error === 'not-allowed') {
+      alert('마이크 사용 권한이 필요합니다. 브라우저 설정에서 마이크를 허용해주세요.');
+      stopRecording();
+    }
+  };
+
+  rec.onend = () => {
+    // 촬영 모드가 켜져 있는 동안 음성인식이 끊어지면 자동 재시작
+    if (isRecording) {
+      clearTimeout(restartTimeout);
+      restartTimeout = setTimeout(() => {
+        if (isRecording) {
+          try {
+            rec.start();
+          } catch (e) {
+            console.log('재시작 시도 중:', e);
+          }
+        }
+      }, 250);
+    }
+  };
+
+  return rec;
+}
+
+function triggerCount(key, amount = 1) {
+  if (!sessionData.counts.hasOwnProperty(key)) return;
+  sessionData.counts[key] = Math.max(0, sessionData.counts[key] + amount);
+  updateRecordUI();
+
+  // 하이라이트 애니메이션
+  const card = $(`card${key}`);
+  if (card) {
+    card.classList.remove('highlight');
+    void card.offsetWidth;
+    card.classList.add('highlight');
+    setTimeout(() => card.classList.remove('highlight'), 250);
+  }
+
+  // 햅틱 진동 피드백
+  if (navigator.vibrate) {
+    try { navigator.vibrate(80); } catch (e) {}
+  }
+}
+
+function updateRecordUI() {
+  $('numA').textContent = sessionData.counts.A;
+  $('numB').textContent = sessionData.counts.B;
+  $('numC').textContent = sessionData.counts.C;
+  $('numX').textContent = sessionData.counts.X;
+
+  const totalFruit = sessionData.counts.A + sessionData.counts.B;
+  const totalBud = sessionData.counts.C + sessionData.counts.X;
+
+  $('recTotalFruit').textContent = totalFruit;
+  $('recTotalBud').textContent = totalBud;
+}
+
+// 수동 + / - 버튼 조작 (촬영 모드)
+document.querySelectorAll('.btn-mini-step').forEach(btn => {
+  btn.onclick = (e) => {
+    e.stopPropagation();
+    const target = btn.dataset.target;
+    const delta = +btn.dataset.delta;
+    triggerCount(target, delta);
   };
 });
 
-// 인풋 값 변경 시 실시간 자동저장 및 검사
-fields.forEach(f => {
-  $(f).addEventListener('input', () => {
-    validate();
-    saveCurrent();
-  });
-});
+// ==========================================
+// 5. 준비 화면 이벤트 및 촬영 시작
+// ==========================================
+function updateFarmerName() {
+  const farm = $('farmId').value;
+  $('farmerName').value = FARM_OWNERS[farm] || '';
+}
 
-// 조사일자 변경 시 데이터 로드
-$('surveyDate').addEventListener('change', () => {
-  idx = 0;
-  show();
-  showStatus(`📅 조사일자가 <b>${$('surveyDate').value}</b>(으)로 변경되었습니다. 해당 날짜 데이터가 로드되었습니다.`);
-});
+$('farmId').addEventListener('change', updateFarmerName);
 
-// 이전 버튼
-$('prev').onclick = () => {
-  saveCurrent();
-  if (idx > 0) {
-    idx--;
-    show();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+$('setupDate').value = getTodayString();
+updateFarmerName();
+updateTodayCountUI();
+
+$('btnStartRecording').onclick = () => {
+  const date = $('setupDate').value;
+  const researcher = $('researcherId').value;
+  const farm = $('farmId').value;
+  const farmer = $('farmerName').value;
+  const individualId = $('individualId').value.trim();
+
+  if (!date) { alert('조사일자를 선택해주세요.'); return; }
+  if (!researcher) { alert('조사자를 선택해주세요.'); return; }
+  if (!farm) { alert('농가번호를 선택해주세요.'); return; }
+  if (!individualId) { alert('개체 ID를 직접 입력해주세요.'); $('individualId').focus(); return; }
+
+  // 중복 검사
+  if (isDuplicateRecord(date, farm, individualId)) {
+    const override = confirm(`⚠️ [${date} / ${farm} / ${individualId}] 개체는 이미 조사된 기록이 있습니다.\n\n다시 촬영하여 기존 데이터를 덮어쓰시겠습니까?`);
+    if (!override) return;
   }
+
+  // 세션 설정
+  sessionData.surveyDate = date;
+  sessionData.researcherId = researcher;
+  sessionData.farmId = farm;
+  sessionData.farmerName = farmer;
+  sessionData.individualId = individualId;
+  sessionData.counts = { A: 0, B: 0, C: 0, X: 0 };
+  sessionData.note = '';
+
+  // 촬영 화면 메타 배지 갱신
+  $('recBadgeLine').textContent = `${researcher} | ${farm} | ${individualId}`;
+  $('recFarmerLine').textContent = farmer;
+  updateRecordUI();
+
+  // 음성인식 초기화 및 시작
+  if (!recognition) {
+    recognition = initRecognition();
+    if (!recognition) return;
+  }
+
+  for (const k in segmentConsumedCounts) delete segmentConsumedCounts[k];
+  isRecording = true;
+
+  try {
+    recognition.start();
+  } catch (e) {}
+
+  requestWakeLock();
+  switchView('record');
 };
 
-// 저장 + 다음 버튼
-$('next').onclick = () => {
-  if (!validate()) {
-    $('validation').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return;
+// ==========================================
+// 6. 촬영 종료 및 확인 화면 전환
+// ==========================================
+function stopRecording() {
+  isRecording = false;
+  clearTimeout(restartTimeout);
+  releaseWakeLock();
+  if (recognition) {
+    try { recognition.stop(); } catch (e) {}
   }
-  saveCurrent();
-  if (idx < 29) {
-    idx++;
-    show();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  } else {
-    showStatus('<div style="color:var(--primary-dark); font-weight:800; font-size:16px;">🎉 마지막 30번째 개체까지 모두 도달했습니다.<br>[입력현황 보기]를 확인하신 후 [CSV 내보내기]를 실행하세요.</div>');
-  }
+}
+
+$('btnStopRecording').onclick = () => {
+  stopRecording();
+  openConfirmView();
 };
 
-// CSV 내보내기 관련 이스케이프 및 생성
+function openConfirmView() {
+  $('cfmDate').textContent = sessionData.surveyDate;
+  $('cfmResearcher').textContent = sessionData.researcherId;
+  $('cfmFarm').textContent = `${sessionData.farmId} (${sessionData.farmerName})`;
+  $('cfmIndividualId').textContent = sessionData.individualId;
+
+  updateConfirmValuesUI();
+  $('cfmNote').value = sessionData.note;
+
+  switchView('confirm');
+}
+
+function updateConfirmValuesUI() {
+  $('cfmValA').textContent = sessionData.counts.A;
+  $('cfmValB').textContent = sessionData.counts.B;
+  $('cfmValC').textContent = sessionData.counts.C;
+  $('cfmValX').textContent = sessionData.counts.X;
+
+  const totalFruit = sessionData.counts.A + sessionData.counts.B;
+  const totalBud = sessionData.counts.C + sessionData.counts.X;
+
+  $('cfmTotalFruit').textContent = `${totalFruit} 개`;
+  $('cfmTotalBud').textContent = `${totalBud} 개`;
+}
+
+// 확인 화면 내 + / - 보정 버튼
+document.querySelectorAll('.btn-confirm-step').forEach(btn => {
+  btn.onclick = () => {
+    const target = btn.dataset.target;
+    const delta = +btn.dataset.delta;
+    sessionData.counts[target] = Math.max(0, sessionData.counts[target] + delta);
+    updateConfirmValuesUI();
+  };
+});
+
+// 촬영으로 복귀
+$('btnBackToRecord').onclick = () => {
+  updateRecordUI();
+  isRecording = true;
+  for (const k in segmentConsumedCounts) delete segmentConsumedCounts[k];
+  try { recognition.start(); } catch (e) {}
+  requestWakeLock();
+  switchView('record');
+};
+
+// ==========================================
+// 7. 확정 · 저장 및 다음 개체 준비
+// ==========================================
+$('btnConfirmSave').onclick = () => {
+  const healthyFruit = sessionData.counts.A;
+  const sickFruit = sessionData.counts.B;
+  const healthyBud = sessionData.counts.C;
+  const sickBud = sessionData.counts.X;
+
+  const totalFruit = healthyFruit + sickFruit;
+  const totalBud = healthyBud + sickBud;
+
+  const record = {
+    surveyDate: sessionData.surveyDate,
+    researcherId: sessionData.researcherId,
+    farmId: sessionData.farmId,
+    farmerName: sessionData.farmerName,
+    individualId: sessionData.individualId,
+    healthyFruit: healthyFruit,
+    sickFruit: sickFruit,
+    healthyBud: healthyBud,
+    sickBud: sickBud,
+    totalFruit: totalFruit,
+    totalBud: totalBud,
+    diseaseRate: '', // 발병률 빈값 유지
+    note: $('cfmNote').value.trim(),
+    createdAt: new Date().toISOString()
+  };
+
+  saveRecord(record);
+
+  // [다음 개체를 위한 상태 복귀]
+  // 조사일자, 조사자, 농가번호, 농장주는 그대로 유지하고 개체ID만 비움
+  $('individualId').value = '';
+  sessionData.counts = { A: 0, B: 0, C: 0, X: 0 };
+  sessionData.note = '';
+
+  switchView('setup');
+  $('individualId').focus();
+};
+
+// ==========================================
+// 8. CSV 내보내기 기능
+// ==========================================
 function esc(v) {
   v = String(v ?? '');
   return '"' + v.replaceAll('"', '""') + '"';
 }
 
-function csvText() {
-  saveCurrent();
-  const data = loadAll();
-  const headers = ['개체ID', '조사 과실 수', '병든 과실 수', '조사 꽃봉오리 수', '병든 꽃봉오리 수', '발병률(%)', '비고'];
+$('btnExportCsv').onclick = () => {
+  const records = loadAllRecords();
+  if (records.length === 0) {
+    alert('저장된 조사 데이터가 없습니다.');
+    return;
+  }
+
+  const headers = [
+    '조사일자', '조사자', '농가번호', '농장주', '개체ID',
+    '건강한 과실(A)', '병든 과실(B)', '조사 과실 수(A+B)',
+    '건강한 봉오리(C)', '병든 봉오리(X)', '조사 봉오리 수(C+X)',
+    '발병률(%)', '비고', '등록일시'
+  ];
+
   let lines = [headers.map(esc).join(',')];
-  
-  slots.forEach(slot => {
-    const r = data.rows[slot] || {};
+
+  records.forEach(r => {
     lines.push([
-      r.individualId ?? '',
-      r.fruit ?? '',
-      r.sickFruit ?? '',
-      r.bud ?? '',
-      r.sickBud ?? '',
-      '', // 발병률 빈칸 유지
-      r.note ?? ''
+      r.surveyDate, r.researcherId, r.farmId, r.farmerName, r.individualId,
+      r.healthyFruit, r.sickFruit, r.totalFruit,
+      r.healthyBud, r.sickBud, r.totalBud,
+      r.diseaseRate, r.note, r.createdAt
     ].map(esc).join(','));
   });
-  return '\ufeff' + lines.join('\r\n');
-}
 
-function downloadFile(name, text, type) {
-  const blob = new Blob([text], { type });
+  const csvContent = '\ufeff' + lines.join('\r\n');
+  const curDate = $('setupDate').value || getTodayString();
+  const filename = `eggplant_survey_v4_${curDate}.csv`;
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = name;
+  a.download = filename;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-}
-
-// CSV 다운로드 (파일명에 조사일자 포함: eggplant_survey_YYYY-MM-DD.csv)
-$('csv').onclick = () => {
-  const dateStr = $('surveyDate').value || getTodayString();
-  const filename = `eggplant_survey_${dateStr}.csv`;
-  downloadFile(filename, csvText(), 'text/csv;charset=utf-8');
 };
 
-// 백업 JSON 다운로드
-$('backup').onclick = () => {
-  saveCurrent();
-  const dateStr = $('surveyDate').value || getTodayString();
-  const filename = `eggplant_survey_backup_${dateStr}.json`;
-  downloadFile(filename, JSON.stringify(loadAll(), null, 2), 'application/json');
-};
-
-function showStatus(html) {
-  const box = $('statusBox');
-  box.style.display = 'block';
-  box.innerHTML = html;
-  box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
-// 입력 현황 보기
-$('list').onclick = () => {
-  saveCurrent();
-  const data = loadAll();
-  let doneCount = 0;
-  let rowsHtml = '';
-
-  slots.forEach((slot, i) => {
-    const r = data.rows[slot] || {};
-    const hasId = !!(r.individualId && r.individualId.trim());
-    const hasValues = [r.fruit, r.sickFruit, r.bud, r.sickBud].some(v => v !== undefined && v !== '');
-    const entered = hasId || hasValues;
-    if (entered) doneCount++;
-
-    rowsHtml += `
-      <div class="status-item">
-        <span class="${entered ? 'status-done' : 'status-yet'}">${entered ? '✓ 완료' : '○ 미입력'}</span>
-        <b>${i + 1}. [슬롯 ${slot}]</b> ID: <u>${r.individualId || '(미입력)'}</u><br>
-        <span style="font-size:13px; color:var(--text-muted); margin-left: 20px;">
-          과실: ${r.fruit ?? '-'} (병든: ${r.sickFruit ?? '-'}) | 꽃봉오리: ${r.bud ?? '-'} (병든: ${r.sickBud ?? '-'})
-          ${r.note ? ` | 비고: ${r.note}` : ''}
-        </span>
-      </div>`;
-  });
-
-  const dateStr = $('surveyDate').value;
-  showStatus(`
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-      <b style="font-size:16px;">📋 입력현황 (${dateStr})</b>
-      <span style="font-weight:800; color:var(--primary); font-size:15px;">진행도: ${doneCount} / 30</span>
-    </div>
-    <div style="border-top: 2px solid var(--border-strong); padding-top:6px;">
-      ${rowsHtml}
-    </div>
-  `);
-};
-
-// 오늘 데이터 초기화 (2단계 명확한 확인 절차)
-$('reset').onclick = () => {
-  const dateStr = $('surveyDate').value || getTodayString();
-  
-  // 1단계 확인
-  const confirm1 = confirm(`[1단계 확인]\n조사일자 [ ${dateStr} ] 의 모든 입력 데이터를 초기화하시겠습니까?`);
-  if (!confirm1) return;
-
-  // 2단계 최종 확인
-  const confirm2 = confirm(`🚨 [2단계 최종 확인]\n초기화 시 현재 날짜의 30개 개체 데이터가 완전히 삭제되며 복구할 수 없습니다.\n\n정말로 [ ${dateStr} ] 데이터를 초기화할까요?`);
-  if (!confirm2) return;
-
-  localStorage.removeItem(getStorageKey());
-  idx = 0;
-  show();
-  showStatus(`<div style="color:var(--danger); font-weight:800;">⚠️ ${dateStr} 조사 데이터가 모두 초기화되었습니다.</div>`);
-};
-
-// 초기 실행
-$('surveyDate').value = getTodayString();
-show();
+// 화면 날짜 변경 시 오늘 조사 개체 수 갱신
+$('setupDate').addEventListener('change', updateTodayCountUI);
 </script>
 </body>
 </html>
