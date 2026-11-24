@@ -2,23 +2,17 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>가지 병해충 현장조사 V4 (GoPro 음성촬영 모드)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>가지 병해 현장조사 | Eggplant Field Survey</title>
 <style>
 :root {
-  --bg-page: #0f172a;
-  --bg-card: #1e293b;
-  --bg-card-sub: #334155;
-  --text-main: #f8fafc;
+  --bg-dark: #0f172a;
+  --panel-bg: #1e293b;
+  --border-color: #334155;
+  --text-light: #f8fafc;
   --text-muted: #94a3b8;
-  --border-strong: #475569;
   
-  --primary: #16a34a;
-  --primary-dark: #15803d;
-  --danger: #dc2626;
-  --danger-dark: #b91c1c;
-
-  /* 4개 카운터 테마 */
+  /* 4개 영역 고대비 테마 */
   --box-a-bg: #064e3b;
   --box-a-border: #10b981;
   --box-a-highlight: #34d399;
@@ -41,228 +35,856 @@
   margin: 0;
   padding: 0;
   -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", sans-serif;
-  background-color: var(--bg-page);
-  color: var(--text-main);
+  background-color: var(--bg-dark);
+  color: var(--text-light);
   height: 100vh;
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
-  user-select: none;
-}
-
-/* 화면 뷰 제어 */
-.view {
-  display: none;
-  width: 100%;
-  height: 100%;
-  flex-direction: column;
-}
-.view.active {
-  display: flex;
-}
-
-/* ==========================================
-   1. 준비 화면 (SETUP VIEW) 스타일
-   ========================================== */
-#viewSetup {
   overflow-y: auto;
-  padding: 16px 14px calc(24px + env(safe-area-inset-bottom, 0px));
-  max-width: 600px;
-  margin: 0 auto;
+  overflow-x: hidden;
+  padding: env(safe-area-inset-top, 6px) env(safe-area-inset-right, 6px) env(safe-area-inset-bottom, 6px) env(safe-area-inset-left, 6px);
 }
 
-.setup-header {
-  margin-bottom: 16px;
-  text-align: center;
-}
-
-.setup-header h1 {
-  font-size: 20px;
-  font-weight: 900;
-  color: #38bdf8;
-  letter-spacing: -0.5px;
-}
-
-.setup-header p {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin-top: 4px;
-}
-
-.card {
-  background: var(--bg-card);
-  border: 2px solid var(--border-strong);
-  border-radius: 16px;
-  padding: 18px 16px;
-  margin-bottom: 14px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
-}
-
-.form-group {
-  margin-bottom: 14px;
-}
-.form-group:last-child {
-  margin-bottom: 0;
-}
-
-.form-group label {
-  display: block;
-  font-size: 14px;
-  font-weight: 800;
-  color: #cbd5e1;
-  margin-bottom: 6px;
-}
-
-.form-group select, 
-.form-group input {
-  width: 100%;
-  height: 52px;
-  font-size: 18px;
-  font-weight: 800;
-  padding: 0 14px;
-  border: 2px solid var(--border-strong);
-  border-radius: 12px;
-  background: #0f172a;
-  color: #ffffff;
-}
-
-.form-group select:focus, 
-.form-group input:focus {
-  outline: none;
-  border-color: #38bdf8;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3);
-}
-
-.form-group input[readonly] {
-  background: #1e293b;
-  color: #38bdf8;
-  border-color: #334155;
-  font-weight: 900;
-}
-
-.grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-/* 거대한 촬영 시작 버튼 */
-.btn-start-record {
-  width: 100%;
-  height: 68px;
-  border-radius: 16px;
-  border: none;
-  background: var(--primary);
-  color: #ffffff;
-  font-size: 22px;
-  font-weight: 900;
+/* ==========================================================================
+   로그인 모달 (PIN 인증 화면)
+   ========================================================================== */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  cursor: pointer;
-  box-shadow: 0 6px 0 var(--primary-dark), 0 8px 16px rgba(22, 163, 74, 0.4);
-  margin-top: 8px;
-  transition: transform 0.08s ease;
+  padding: 16px;
+  animation: fadeIn 0.2s ease-out;
 }
 
-.btn-start-record:active {
-  transform: translateY(4px);
-  box-shadow: 0 2px 0 var(--primary-dark);
-}
-
-/* 준비화면 하단 조사현황 및 CSV 도구 */
-.setup-summary {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px;
+.modal-card {
+  width: 100%;
+  max-width: 360px;
   background: #1e293b;
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 700;
-  border: 1px solid var(--border-strong);
-  margin-top: 6px;
-}
-
-.btn-csv {
-  background: #334155;
-  color: #f8fafc;
-  border: 1px solid #64748b;
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 13px;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-/* ==========================================
-   2. 촬영 모드 (RECORDING VIEW) 스타일
-   ========================================== */
-#viewRecord {
-  padding: env(safe-area-inset-top, 6px) env(safe-area-inset-right, 6px) env(safe-area-inset-bottom, 6px) env(safe-area-inset-left, 6px);
-  background: #020617;
-}
-
-/* 상단 미니 정보 바 */
-.rec-top-bar {
-  background: #1e293b;
-  border-radius: 12px;
-  padding: 8px 12px;
-  margin-bottom: 6px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border: 1px solid #334155;
-}
-
-.rec-meta {
+  border: 1.5px solid #334155;
+  border-radius: 20px;
+  padding: 24px 20px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
 }
 
-.rec-badge-line {
-  font-size: 16px;
+.modal-header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.modal-title {
+  font-size: 18px;
   font-weight: 900;
   color: #38bdf8;
   letter-spacing: 0.5px;
 }
 
-.rec-farmer-line {
+.modal-subtitle {
   font-size: 12px;
-  font-weight: 700;
   color: var(--text-muted);
+  margin-top: 4px;
 }
 
-.rec-mic-status {
-  background: #166534;
+/* 조사자 R1~R4 선택 탭 */
+.researcher-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.tab-btn {
+  height: 44px;
+  background: #0f172a;
+  border: 1.5px solid #334155;
+  border-radius: 10px;
+  color: #94a3b8;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tab-btn.active {
+  background: #0284c7;
+  border-color: #38bdf8;
   color: #ffffff;
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 900;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+}
+
+.tab-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* 6자리 PIN 인디케이터 */
+.pin-dots {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+
+.dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #64748b;
+  background: transparent;
+  transition: all 0.15s ease;
+}
+
+.dot.filled {
+  background: #38bdf8;
+  border-color: #38bdf8;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+  transform: scale(1.15);
+}
+
+.pin-hidden-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: auto;
+  width: 1px;
+  height: 1px;
+  top: 0;
+  left: 0;
+  font-size: 16px;
+}
+
+/* 모바일 전용 3x4 대형 숫자 키패드 */
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.key-btn {
+  height: 50px;
+  background: #334155;
+  border: none;
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 800;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 5px;
-  border: 1px solid #22c55e;
-  animation: pulse-mic 1.5s infinite;
+  justify-content: center;
+  transition: background 0.1s ease, transform 0.08s ease;
 }
 
-@keyframes pulse-mic {
+.key-btn:active {
+  background: #475569;
+  transform: scale(0.95);
+}
+
+.key-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.key-btn.action {
+  background: #1e293b;
+  border: 1px solid #475569;
+  font-size: 15px;
+  color: #cbd5e1;
+}
+
+.key-btn.action:active {
+  background: #334155;
+}
+
+/* 로그인 버튼 */
+.btn-login-submit {
+  width: 100%;
+  height: 48px;
+  background: #0284c7;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+}
+
+.btn-login-submit:disabled {
+  background: #475569;
+  color: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.modal-msg {
+  min-height: 22px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  margin-top: 10px;
+  line-height: 1.4;
+}
+
+.msg-error { color: #f87171; }
+.msg-warn  { color: #facc15; }
+.msg-info  { color: #38bdf8; }
+
+.modal-extra-actions {
+  width: 100%;
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.btn-discard-draft {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* ==========================================================================
+   메인 조사 화면 헤더 & 패널
+   ========================================================================== */
+header {
+  padding: 8px 10px;
+  background: var(--panel-bg);
+  border-radius: 12px;
+  margin-bottom: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: -0.2px;
+  color: #38bdf8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.env-badge-test {
+  display: none; /* 기본 숨김, test 환경 감지 시 동적 활성화 */
+  background: #f59e0b;
+  color: #0f172a;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 4px;
+  letter-spacing: 0.2px;
+  flex-shrink: 0;
+}
+
+.top-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mode-toggle-btn {
+  font-size: 12px;
+  font-weight: 900;
+  padding: 5px 9px;
+  border-radius: 20px;
+  border: 1px solid #eab308;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.mode-fast {
+  background: #ca8a04;
+  color: #ffffff;
+  border-color: #facc15;
+  box-shadow: 0 0 8px rgba(250, 204, 21, 0.4);
+}
+
+.mode-normal {
+  background: #334155;
+  color: #94a3b8;
+  border-color: #64748b;
+}
+
+.mic-badge {
+  font-size: 12px;
+  font-weight: 800;
+  padding: 5px 9px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid transparent;
+}
+
+.mic-off {
+  background: #334155;
+  color: #94a3b8;
+  border-color: #475569;
+}
+
+.mic-listening {
+  background: #166534;
+  color: #ffffff;
+  border-color: #22c55e;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
   0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
   70% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
   100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
 }
 
-/* 2 x 2 카운터 그리드 */
-.rec-grid {
+.header-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-ctrl {
   flex: 1;
+  padding: 8px 0;
+  font-size: 14px;
+  font-weight: 800;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-start { background: #22c55e; color: #052e16; }
+.btn-start:active { background: #16a34a; }
+.btn-stop { background: #ef4444; color: #ffffff; }
+.btn-stop:active { background: #dc2626; }
+.btn-reset { flex: 0 0 52px; background: #475569; color: #f8fafc; font-size: 13px; }
+
+.recent-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 0 2px;
+}
+
+.recent-val {
+  font-weight: 800;
+  color: #facc15;
+}
+
+/* 확인음 설정 바 (야외 현장용 콤팩트 UI) */
+.sound-ctrl-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: #cbd5e1;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.sound-ctrl-left {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.sound-toggle-btn {
+  background: #334155;
+  color: #94a3b8;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 2px 7px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sound-toggle-btn.sound-on {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #38bdf8;
+}
+
+.sound-ctrl-middle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: 1;
+  min-width: 0;
+}
+
+.sound-slider {
+  flex: 1;
+  min-width: 50px;
+  height: 6px;
+  accent-color: #38bdf8;
+  cursor: pointer;
+}
+
+.sound-vol-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #f8fafc;
+  min-width: 28px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.btn-sound-test {
+  background: #1e293b;
+  color: #38bdf8;
+  border: 1px solid #0284c7;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-sound-test:active {
+  background: #0369a1;
+  color: #ffffff;
+}
+
+/* 음성 인식 원문 진단 바 (Step 11-E-2) */
+.diag-ctrl-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px dashed #475569;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 11px;
+  color: #94a3b8;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.diag-toggle-btn {
+  background: #1e293b;
+  color: #64748b;
+  border: 1px solid #334155;
+  border-radius: 5px;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.diag-toggle-btn.diag-on {
+  background: #4338ca;
+  color: #ffffff;
+  border-color: #6366f1;
+}
+
+.diag-display-box {
+  background: #0b1120;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.diag-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.diag-label {
+  font-weight: 800;
+  color: #64748b;
+  flex-shrink: 0;
+  font-size: 10px;
+}
+
+.diag-val {
+  font-weight: 700;
+  color: #f1f5f9;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.diag-val.interim {
+  color: #38bdf8;
+}
+
+.diag-val.final {
+  color: #4ade80;
+}
+
+.diag-val.unmapped {
+  color: #f87171;
+}
+
+.diag-val.consumed {
+  color: #fbbf24;
+}
+
+/* 농가별 현장 조사 현황 및 CSV 모달 (Step 11-G-1) */
+.btn-open-status {
+  background: #0284c7;
+  color: #ffffff;
+  border: 1px solid #38bdf8;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 2px;
+}
+
+.btn-open-status:active {
+  background: #0369a1;
+}
+
+.status-modal-content {
+  background: var(--panel-bg);
+  border: 1.5px solid var(--border-color);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 440px;
+  max-height: 90vh;
+  max-height: 90dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+}
+
+.status-modal-header {
+  padding: 12px 14px 8px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-modal-title {
+  font-size: 15px;
+  font-weight: 900;
+  color: #38bdf8;
+}
+
+.btn-close-status {
+  background: #334155;
+  border: none;
+  color: #cbd5e1;
+  font-size: 14px;
+  font-weight: 800;
+  border-radius: 6px;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+
+.status-filter-bar {
+  padding: 8px 12px;
+  background: rgba(15, 23, 42, 0.6);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.status-filter-bar input,
+.status-filter-bar select {
+  height: 34px;
+  border-radius: 6px;
+  border: 1px solid #475569;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+  min-width: 0;
+}
+
+.btn-refresh-status {
+  height: 34px;
+  background: #334155;
+  color: #f8fafc;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-export-csv {
+  height: 34px;
+  background: #16a34a;
+  color: #ffffff;
+  border: 1px solid #22c55e;
+  border-radius: 6px;
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-export-csv:disabled {
+  background: #475569;
+  border-color: #64748b;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.status-summary-bar {
+  padding: 6px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 800;
+  background: #0f172a;
+}
+
+.summary-badge-done {
+  color: #4ade80;
+}
+
+.summary-badge-pending {
+  color: #fb923c;
+}
+
+.status-list-container {
+  padding: 8px 12px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.status-item {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 6px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.status-item.done {
+  border-left: 4px solid #22c55e;
+}
+
+.status-item.pending {
+  border-left: 4px solid #64748b;
+  opacity: 0.65;
+}
+
+.status-item.warning {
+  border-left: 4px solid #ef4444;
+  background: rgba(127, 29, 29, 0.2);
+}
+
+.status-id-badge {
+  font-weight: 900;
+  font-size: 13px;
+  color: #facc15;
+  min-width: 42px;
+}
+
+.status-counts-info {
+  display: flex;
+  gap: 8px;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.status-counts-info b {
+  color: #ffffff;
+}
+
+.status-msg-box {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  display: none;
+}
+
+/* 조사 메타데이터 입력 패널 */
+.meta-panel {
+  background: var(--panel-bg);
+  border-radius: 12px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 1px solid var(--border-color);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.meta-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}
+
+.meta-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0; /* flex 자식 요소의 오버플로우 방지 및 축소 허용 */
+}
+
+.meta-col label {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.meta-col select,
+.meta-col input {
+  height: 38px;
+  border-radius: 8px;
+  border: 1.5px solid #475569;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 0 8px;
+  font-size: 16px; /* iOS Safari 16px 미만 자동 확대(Zoom-in) 방지 필수 */
+  font-weight: 700;
+  font-family: inherit;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+/* 로그인된 고정 조사자 배지 (위조 방지) */
+.user-fixed-badge {
+  height: 38px;
+  background: #0284c7;
+  border: 1.5px solid #38bdf8;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px;
+  color: #ffffff;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.user-id-tag {
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.btn-change-user {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 2px 4px;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-change-user:active {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+/* 2 x 2 카운팅 메인 그리드 */
+.grid-container {
+  flex: 1;
+  min-height: 280px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
@@ -270,14 +892,15 @@ body {
   margin-bottom: 6px;
 }
 
-.counter-card {
+.count-card {
   border-radius: 16px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: 10px;
+  position: relative;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, border-color 0.08s ease;
   border: 3px solid;
-  transition: transform 0.08s ease, box-shadow 0.08s ease;
 }
 
 .card-a { background: var(--box-a-bg); border-color: var(--box-a-border); }
@@ -285,25 +908,24 @@ body {
 .card-c { background: var(--box-c-bg); border-color: var(--box-c-border); }
 .card-x { background: var(--box-x-bg); border-color: var(--box-x-border); }
 
-/* 음성 인식 성공 시 플래시 하이라이트 */
-.card-a.highlight { border-color: #ffffff; box-shadow: 0 0 24px var(--box-a-highlight); transform: scale(1.02); }
-.card-b.highlight { border-color: #ffffff; box-shadow: 0 0 24px var(--box-b-highlight); transform: scale(1.02); }
-.card-c.highlight { border-color: #ffffff; box-shadow: 0 0 24px var(--box-c-highlight); transform: scale(1.02); }
-.card-x.highlight { border-color: #ffffff; box-shadow: 0 0 24px var(--box-x-highlight); transform: scale(1.02); }
+.card-a.highlight { border-color: #ffffff; box-shadow: 0 0 25px var(--box-a-highlight); transform: scale(1.02); }
+.card-b.highlight { border-color: #ffffff; box-shadow: 0 0 25px var(--box-b-highlight); transform: scale(1.02); }
+.card-c.highlight { border-color: #ffffff; box-shadow: 0 0 25px var(--box-c-highlight); transform: scale(1.02); }
+.card-x.highlight { border-color: #ffffff; box-shadow: 0 0 25px var(--box-x-highlight); transform: scale(1.02); }
 
-.card-top {
+.card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
 }
 
-.key-tag {
+.key-label {
   font-size: 28px;
   font-weight: 900;
   line-height: 1;
 }
 
-.key-name {
+.name-label {
   font-size: 13px;
   font-weight: 700;
   opacity: 0.9;
@@ -311,8 +933,8 @@ body {
   line-height: 1.2;
 }
 
-.big-number {
-  font-size: clamp(52px, 14vw, 86px);
+.count-num {
+  font-size: clamp(48px, 12vw, 82px);
   font-weight: 900;
   text-align: center;
   line-height: 1;
@@ -321,13 +943,13 @@ body {
   margin: auto 0;
 }
 
-.card-step-row {
+.card-footer {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
 }
 
-.btn-mini-step {
+.step-btn {
   width: 44px;
   height: 40px;
   border-radius: 10px;
@@ -342,450 +964,501 @@ body {
   justify-content: center;
 }
 
-.btn-mini-step:active {
+.step-btn:active {
   background: rgba(255, 255, 255, 0.5);
   transform: scale(0.95);
 }
 
-/* 하단 계산 바 및 거대한 촬영 종료 버튼 */
-.rec-footer {
+/* 하단 자동 계산 및 저장 영역 */
+footer {
+  background: var(--panel-bg);
+  border-radius: 12px;
+  padding: 8px 10px;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  border: 1px solid var(--border-color);
 }
 
-.rec-totals-bar {
-  background: #1e293b;
-  border-radius: 12px;
-  padding: 8px 12px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+.footer-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 8px;
-  border: 1px solid #334155;
-  font-size: 13px;
+}
+
+.calc-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.calc-title {
+  font-size: 11px;
   font-weight: 700;
-}
-
-.total-item {
   color: var(--text-muted);
-}
-.total-item b {
-  color: #38bdf8;
-  font-size: 16px;
+  margin-bottom: 2px;
 }
 
-.btn-stop-record {
-  width: 100%;
-  height: 64px;
-  border-radius: 16px;
-  border: none;
-  background: var(--danger);
-  color: #ffffff;
-  font-size: 22px;
+.calc-val {
+  font-size: 16px;
   font-weight: 900;
+  color: #f8fafc;
+}
+
+.calc-val b {
+  color: #38bdf8;
+  font-size: 18px;
+}
+
+.btn-save-next {
+  flex: 1.2;
+  height: 46px;
+  background: #16a34a;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 900;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  cursor: pointer;
-  box-shadow: 0 4px 0 var(--danger-dark);
+  gap: 6px;
+  box-shadow: 0 3px 0 #15803d;
+  transition: all 0.1s ease;
 }
 
-.btn-stop-record:active {
-  transform: translateY(3px);
+.btn-save-next:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #15803d;
+}
+
+.btn-save-next:disabled {
+  background: #475569;
+  color: #94a3b8;
   box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
 }
 
-/* ==========================================
-   3. 확인 화면 (CONFIRM VIEW) 스타일
-   ========================================== */
-#viewConfirm {
-  overflow-y: auto;
-  padding: 16px 14px calc(24px + env(safe-area-inset-bottom, 0px));
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.confirm-header {
+.save-status-msg {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 800;
   text-align: center;
-  margin-bottom: 14px;
+  animation: fadeIn 0.2s ease;
 }
 
-.confirm-header h2 {
-  font-size: 20px;
-  font-weight: 900;
-  color: #facc15;
-}
+.status-success { background: #15803d; color: #ffffff; }
+.status-warn    { background: #ca8a04; color: #ffffff; }
+.status-error   { background: #b91c1c; color: #ffffff; }
 
-.info-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 12px;
-  font-size: 14px;
-}
-
-.info-table td {
-  padding: 6px 0;
-  border-bottom: 1px solid #334155;
-}
-
-.info-table td.label {
-  font-weight: 700;
-  color: var(--text-muted);
-  width: 90px;
-}
-
-.info-table td.val {
-  font-weight: 900;
-  color: #ffffff;
-  font-size: 15px;
-}
-
-/* 확인 화면 카운터 수정 리스트 */
-.confirm-items {
+/* 미저장 데이터 보호 배너 */
+.draft-protection-banner {
+  background: #78350f;
+  border: 1.5px solid #f59e0b;
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 14px;
+  animation: fadeIn 0.2s ease;
 }
 
-.confirm-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: 2px solid;
-}
-
-.confirm-row.item-a { background: rgba(6, 78, 59, 0.3); border-color: var(--box-a-border); }
-.confirm-row.item-b { background: rgba(127, 29, 29, 0.3); border-color: var(--box-b-border); }
-.confirm-row.item-c { background: rgba(30, 58, 138, 0.3); border-color: var(--box-c-border); }
-.confirm-row.item-x { background: rgba(88, 28, 135, 0.3); border-color: var(--box-x-border); }
-
-.item-desc b {
-  font-size: 18px;
-  margin-right: 6px;
-}
-.item-desc span {
+.draft-prot-info {
   font-size: 13px;
-  color: var(--text-muted);
+  font-weight: 700;
+  color: #fef3c7;
+  line-height: 1.4;
 }
 
-.item-control {
+.draft-prot-btns {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
-.item-val {
-  font-size: 24px;
-  font-weight: 900;
-  min-width: 36px;
-  text-align: center;
-}
-
-.btn-confirm-step {
-  width: 40px;
-  height: 38px;
-  border-radius: 10px;
-  border: 1px solid var(--border-strong);
-  background: #334155;
+.btn-prot-restore {
+  flex: 1;
+  height: 36px;
+  background: #0284c7;
   color: #ffffff;
-  font-size: 20px;
-  font-weight: 900;
-  cursor: pointer;
-}
-.btn-confirm-step:active {
-  background: #475569;
-}
-
-.confirm-totals-box {
-  background: #0f172a;
-  border: 2px solid #334155;
-  border-radius: 12px;
-  padding: 12px;
-  margin-bottom: 14px;
-  font-size: 15px;
-  font-weight: 800;
-}
-
-.confirm-totals-box div {
-  margin: 4px 0;
-  display: flex;
-  justify-content: space-between;
-}
-
-.note-input {
-  width: 100%;
-  height: 60px;
-  background: #0f172a;
-  border: 2px solid var(--border-strong);
-  border-radius: 10px;
-  padding: 10px;
-  color: #fff;
-  font-size: 15px;
-  resize: none;
-  margin-top: 6px;
-}
-
-/* 확인 화면 버튼 그룹 */
-.confirm-actions {
-  display: grid;
-  grid-template-columns: 1fr 1.6fr;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.btn-back-rec {
-  height: 58px;
-  border-radius: 14px;
-  border: 2px solid var(--border-strong);
-  background: #334155;
-  color: #ffffff;
-  font-size: 16px;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.btn-confirm-save {
-  height: 58px;
-  border-radius: 14px;
   border: none;
-  background: var(--primary);
-  color: #ffffff;
-  font-size: 19px;
-  font-weight: 900;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 4px 0 var(--primary-dark);
 }
-.btn-confirm-save:active {
-  transform: translateY(3px);
-  box-shadow: none;
+
+.btn-prot-discard {
+  flex: 1;
+  height: 36px;
+  background: #475569;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
 </head>
 <body>
 
-<!-- ==========================================
-     1. 준비 화면 (SETUP VIEW)
-     ========================================== -->
-<div id="viewSetup" class="view active">
-  <div class="setup-header">
-    <h1>🍆 가지 병해충 현장조사 V4</h1>
-    <p>GoPro 촬영 연동 · FAST MODE 음성 카운팅</p>
+<!-- ==========================================================================
+     PIN 인증 모달
+     ========================================================================== -->
+<div id="authModal" class="modal-backdrop" style="display: flex;">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title">🔐 조사자 PIN 로그인</div>
+      <div class="modal-subtitle" id="authModalSubtitle">가지 생육조사를 시작하려면 로그인하세요</div>
+    </div>
+
+    <!-- 조사자 선택 탭 (R1 ~ R4) -->
+    <div class="researcher-tabs" id="researcherTabs">
+      <button type="button" class="tab-btn active" data-id="R1">R1</button>
+      <button type="button" class="tab-btn" data-id="R2">R2</button>
+      <button type="button" class="tab-btn" data-id="R3">R3</button>
+      <button type="button" class="tab-btn" data-id="R4">R4</button>
+    </div>
+
+    <!-- 6자리 PIN 인디케이터 (원형 dot) -->
+    <div class="pin-dots" id="pinDots" onclick="focusPinInput()">
+      <div class="dot" id="dot0"></div>
+      <div class="dot" id="dot1"></div>
+      <div class="dot" id="dot2"></div>
+      <div class="dot" id="dot3"></div>
+      <div class="dot" id="dot4"></div>
+      <div class="dot" id="dot5"></div>
+    </div>
+
+    <!-- 모바일 소프트 키보드 연결용 인풋 (숨김) -->
+    <input type="password" id="pinInput" class="pin-hidden-input" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="current-password">
+
+    <!-- 화면 내 대형 숫자 키패드 (야외 현장용) -->
+    <div class="keypad">
+      <button type="button" class="key-btn" onclick="pressPinKey('1')">1</button>
+      <button type="button" class="key-btn" onclick="pressPinKey('2')">2</button>
+      <button type="button" class="key-btn" onclick="pressPinKey('3')">3</button>
+      <button type="button" class="key-btn" onclick="pressPinKey('4')">4</button>
+      <button type="button" class="key-btn" onclick="pressPinKey('5')">5</button>
+      <button type="button" class="key-btn" onclick="pressPinKey('6')">6</button>
+      <button type="button" class="key-btn" onclick="pressPinKey('7')">7</button>
+      <button type="button" class="key-btn" onclick="pressPinKey('8')">8</button>
+      <button type="button" class="key-btn" onclick="pressPinKey('9')">9</button>
+      <button type="button" class="key-btn action" onclick="clearPinKey()">전체삭제</button>
+      <button type="button" class="key-btn" onclick="pressPinKey('0')">0</button>
+      <button type="button" class="key-btn action" onclick="deletePinKey()">⌫</button>
+    </div>
+
+    <button type="button" id="btnLoginSubmit" class="btn-login-submit" disabled onclick="submitLogin()">
+      로그인
+    </button>
+
+    <div id="authMsg" class="modal-msg"></div>
+
+    <div class="modal-extra-actions" id="modalExtraActions" style="display: none;">
+      <button type="button" class="btn-discard-draft" onclick="confirmDiscardDraftFromModal()">
+        현재 작성 중인 미저장 데이터 폐기하기
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     상단 헤더
+     ========================================================================== -->
+<header>
+  <div class="header-top">
+    <div class="title-wrap">
+      <div class="title" id="appMainTitle">🍆 가지 병해 현장조사</div>
+      <span class="env-badge-prod" id="envBadgeProd" style="display: none;"></span>
+    </div>
+    <div class="top-badges">
+      <button type="button" id="modeToggleBtn" class="mode-toggle-btn mode-fast">
+        <span id="modeIcon">⚡</span> <span id="modeText">FAST MODE ON</span>
+      </button>
+      <div id="micStatus" class="mic-badge mic-off">
+        <span id="micDot">●</span> <span id="micText">OFF</span>
+      </div>
+    </div>
   </div>
 
-  <div class="card">
-    <div class="form-group">
-      <label for="setupDate">📅 조사일자</label>
-      <input type="date" id="setupDate">
-    </div>
+  <div class="header-controls">
+    <button type="button" id="startBtn" class="btn-ctrl btn-start">▶ 음성 시작</button>
+    <button type="button" id="stopBtn" class="btn-ctrl btn-stop">■ 음성 종료</button>
+    <button type="button" id="resetBtn" class="btn-ctrl btn-reset">초기화</button>
+  </div>
 
-    <div class="grid-2 form-group">
-      <div>
-        <label for="researcherId">👤 조사자</label>
-        <select id="researcherId">
-          <option value="R1">R1</option>
-          <option value="R2">R2</option>
-          <option value="R3">R3</option>
-          <option value="R4">R4</option>
-        </select>
+  <div class="recent-bar">
+    <span>명령어: <b>A</b>(건강과실) <b>B</b>(병든과실) <b>C</b>(건강봉오리) <b>X</b>(병든봉오리)</span>
+    <span>최근 인식: <span id="recentLog" class="recent-val">-</span></span>
+  </div>
+
+  <div class="sound-ctrl-bar">
+    <div class="sound-ctrl-left">
+      <span>🔔 확인음</span>
+      <button type="button" id="soundToggleBtn" class="sound-toggle-btn sound-on">ON</button>
+    </div>
+    <div class="sound-ctrl-middle">
+      <input type="range" id="soundVolSlider" class="sound-slider" min="0" max="100" value="50" step="5" aria-label="확인음 음량">
+      <span id="soundVolLabel" class="sound-vol-label">50%</span>
+    </div>
+    <button type="button" id="soundTestBtn" class="btn-sound-test">소리 테스트</button>
+  </div>
+
+  <div class="diag-ctrl-bar">
+    <span>🔍 음성 원문 진단</span>
+    <button type="button" id="diagToggleBtn" class="diag-toggle-btn">OFF</button>
+  </div>
+  <div id="diagDisplayBox" class="diag-display-box" style="display: none;">
+    <div class="diag-row">
+      <span class="diag-label">음성 원문:</span>
+      <span id="diagRawText" class="diag-val">-</span>
+    </div>
+    <div class="diag-row">
+      <span class="diag-label">판정 상태:</span>
+      <span id="diagStatusText" class="diag-val">-</span>
+    </div>
+  </div>
+</header>
+
+<!-- 미저장 데이터 보호 배너 -->
+<div id="draftProtectionBanner" class="draft-protection-banner" style="display: none;">
+  <div class="draft-prot-info" id="draftProtInfo">⚠ 보존된 이전 미저장 데이터가 있습니다. 새 작업 시 덮어쓰기가 방지됩니다.</div>
+  <div class="draft-prot-btns">
+    <button type="button" class="btn-prot-restore" onclick="restoreProtectedDraft()">이전 데이터 복원</button>
+    <button type="button" class="btn-prot-discard" onclick="discardProtectedDraft()">이전 데이터 폐기</button>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     조사 메타데이터 입력 패널
+     ========================================================================== -->
+<section class="meta-panel">
+  <div class="meta-row">
+    <div class="meta-col" style="flex: 1.1;">
+      <label for="surveyDate">조사일자</label>
+      <input type="date" id="surveyDate">
+    </div>
+    <div class="meta-col" style="flex: 1.0;">
+      <label>조사자 (인증됨)</label>
+      <div class="user-fixed-badge">
+        <span class="user-id-tag" id="currentUserId">R1</span>
+        <button type="button" class="btn-change-user" onclick="promptChangeUser()">조사자 변경</button>
       </div>
+    </div>
+    <div class="meta-col" style="flex: 1.4;">
+      <label for="farmId">농가 / 농장주</label>
+      <select id="farmId">
+        <option value="G1">G1 (윤종우)</option>
+        <option value="G2">G2 (안철우)</option>
+        <option value="G3">G3 (손범식)</option>
+        <option value="G4">G4 (전충호)</option>
+        <option value="G5">G5 (최종건)</option>
+        <option value="G6">G6 (박기환)</option>
+      </select>
+    </div>
+  </div>
+  <div class="meta-row">
+    <div class="meta-col" style="flex: 1.1;">
+      <label for="individualId">개체 ID <span style="color:#ef4444">*</span></label>
+      <input type="text" id="individualId" placeholder="예: 1-1" autocomplete="off">
+    </div>
+    <div class="meta-col" style="flex: 1.9;">
+      <label for="note">비고</label>
+      <input type="text" id="note" placeholder="메모 (필요 시)">
+    </div>
+  </div>
+  <button type="button" id="btnOpenStatusModal" class="btn-open-status">
+    📋 농가별 현장 조사현황 및 CSV 다운로드
+  </button>
+</section>
 
-      <div>
-        <label for="farmId">🏡 농가번호</label>
-        <select id="farmId">
-          <option value="G1">G1</option>
-          <option value="G2">G2</option>
-          <option value="G3">G3</option>
-          <option value="G4">G4</option>
-          <option value="G5">G5</option>
-          <option value="G6">G6</option>
-        </select>
-      </div>
+<!-- ==========================================================================
+     농가별 조사현황 및 CSV 모달
+     ========================================================================== -->
+<div id="statusModal" class="modal-backdrop" style="display: none;">
+  <div class="status-modal-content">
+    <div class="status-modal-header">
+      <div class="status-modal-title">📋 농가별 조사현황 및 CSV</div>
+      <button type="button" id="btnCloseStatusModal" class="btn-close-status">✕ 닫기</button>
     </div>
 
-    <div class="form-group">
-      <label for="farmerName">👨‍🌾 농장주 (자동 표시)</label>
-      <input id="farmerName" type="text" readonly>
+    <div class="status-filter-bar">
+      <input type="date" id="statusFilterDate" style="flex: 1.2;">
+      <select id="statusFilterFarm" style="flex: 1.0;">
+        <option value="G1">G1 (윤종우)</option>
+        <option value="G2">G2 (안철우)</option>
+        <option value="G3">G3 (손범식)</option>
+        <option value="G4">G4 (전충호)</option>
+        <option value="G5">G5 (최종건)</option>
+        <option value="G6">G6 (박기환)</option>
+      </select>
+      <button type="button" id="btnRefreshStatus" class="btn-refresh-status">🔄 조회</button>
+      <button type="button" id="btnExportCsv" class="btn-export-csv">📥 CSV</button>
     </div>
 
-    <div class="form-group">
-      <label for="individualId">🏷️ 개체 ID (직접 입력) <span style="color:var(--danger)">*</span></label>
-      <input id="individualId" type="text" placeholder="예: 1-1, 1-2, 2-5" autocomplete="off" autofocus>
+    <div class="status-summary-bar">
+      <span>전체 <b>30</b>개체</span>
+      <span class="summary-badge-done">완료: <b id="statusCountDone">0</b></span>
+      <span class="summary-badge-pending">미조사: <b id="statusCountPending">30</b></span>
     </div>
 
-    <button type="button" id="btnStartRecording" class="btn-start-record">
-      ▶ 촬영 시작 (음성 활성화)
+    <div id="statusMsgBox" class="status-msg-box"></div>
+
+    <div id="statusListContainer" class="status-list-container">
+      <!-- 1-1부터 3-10까지 30개체 동적 렌더링 -->
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     2 x 2 카운팅 메인 영역
+     ========================================================================== -->
+<main class="grid-container">
+  <!-- A: 건강한 과실 -->
+  <section class="count-card card-a" id="cardA">
+    <div class="card-header">
+      <span class="key-label">A</span>
+      <span class="name-label">건강한 과실</span>
+    </div>
+    <div class="count-num" id="numA">0</div>
+    <div class="card-footer">
+      <button type="button" class="step-btn" data-target="A" data-delta="-1" aria-label="A 감소">−</button>
+      <button type="button" class="step-btn" data-target="A" data-delta="1" aria-label="A 증가">＋</button>
+    </div>
+  </section>
+
+  <!-- B: 병든 과실 -->
+  <section class="count-card card-b" id="cardB">
+    <div class="card-header">
+      <span class="key-label">B</span>
+      <span class="name-label">병든 과실</span>
+    </div>
+    <div class="count-num" id="numB">0</div>
+    <div class="card-footer">
+      <button type="button" class="step-btn" data-target="B" data-delta="-1" aria-label="B 감소">−</button>
+      <button type="button" class="step-btn" data-target="B" data-delta="1" aria-label="B 증가">＋</button>
+    </div>
+  </section>
+
+  <!-- C: 건강한 봉오리 -->
+  <section class="count-card card-c" id="cardC">
+    <div class="card-header">
+      <span class="key-label">C</span>
+      <span class="name-label">건강한 봉오리</span>
+    </div>
+    <div class="count-num" id="numC">0</div>
+    <div class="card-footer">
+      <button type="button" class="step-btn" data-target="C" data-delta="-1" aria-label="C 감소">−</button>
+      <button type="button" class="step-btn" data-target="C" data-delta="1" aria-label="C 증가">＋</button>
+    </div>
+  </section>
+
+  <!-- X: 병든 봉오리 -->
+  <section class="count-card card-x" id="cardX">
+    <div class="card-header">
+      <span class="key-label">X</span>
+      <span class="name-label">병든 봉오리</span>
+    </div>
+    <div class="count-num" id="numX">0</div>
+    <div class="card-footer">
+      <button type="button" class="step-btn" data-target="X" data-delta="-1" aria-label="X 감소">−</button>
+      <button type="button" class="step-btn" data-target="X" data-delta="1" aria-label="X 증가">＋</button>
+    </div>
+  </section>
+</main>
+
+<!-- ==========================================================================
+     하단 계산 바 및 저장 영역
+     ========================================================================== -->
+<footer>
+  <div class="footer-top-row">
+    <div class="calc-box">
+      <div class="calc-title">과실 (A+B)</div>
+      <div class="calc-val"><b id="totalFruit">0</b> 개</div>
+    </div>
+    <div class="calc-box">
+      <div class="calc-title">봉오리 (C+X)</div>
+      <div class="calc-val"><b id="totalBud">0</b> 개</div>
+    </div>
+    <button type="button" id="btnSaveNext" class="btn-save-next">
+      💾 저장 + 다음
     </button>
   </div>
-
-  <div class="setup-summary">
-    <div>
-      오늘 조사된 개체: <b id="todayCount" style="color:#38bdf8; font-size:16px;">0</b>개
-    </div>
-    <button type="button" id="btnExportCsv" class="btn-csv">📥 CSV 내보내기</button>
-  </div>
-</div>
-
-<!-- ==========================================
-     2. 촬영 모드 (RECORDING VIEW)
-     ========================================== -->
-<div id="viewRecord" class="view">
-  <!-- 상단 미니 바 -->
-  <div class="rec-top-bar">
-    <div class="rec-meta">
-      <div class="rec-badge-line" id="recBadgeLine">R1 | G1 | 1-1</div>
-      <div class="rec-farmer-line">농장주: <span id="recFarmerLine">윤종우</span></div>
-    </div>
-    <div class="rec-mic-status">
-      <span>🎙</span> <span>LISTENING</span>
-    </div>
-  </div>
-
-  <!-- 2 x 2 카운터 그리드 -->
-  <main class="rec-grid">
-    <!-- A: 건강한 과실 -->
-    <section class="counter-card card-a" id="cardA">
-      <div class="card-top">
-        <span class="key-tag">A</span>
-        <span class="key-name">건강한 과실</span>
-      </div>
-      <div class="big-number" id="numA">0</div>
-      <div class="card-step-row">
-        <button type="button" class="btn-mini-step" data-target="A" data-delta="-1" aria-label="A 감소">−</button>
-        <button type="button" class="btn-mini-step" data-target="A" data-delta="1" aria-label="A 증가">＋</button>
-      </div>
-    </section>
-
-    <!-- B: 병든 과실 -->
-    <section class="counter-card card-b" id="cardB">
-      <div class="card-top">
-        <span class="key-tag">B</span>
-        <span class="key-name">병든 과실</span>
-      </div>
-      <div class="big-number" id="numB">0</div>
-      <div class="card-step-row">
-        <button type="button" class="btn-mini-step" data-target="B" data-delta="-1" aria-label="B 감소">−</button>
-        <button type="button" class="btn-mini-step" data-target="B" data-delta="1" aria-label="B 증가">＋</button>
-      </div>
-    </section>
-
-    <!-- C: 건강한 봉오리 -->
-    <section class="counter-card card-c" id="cardC">
-      <div class="card-top">
-        <span class="key-tag">C</span>
-        <span class="key-name">건강한 봉오리</span>
-      </div>
-      <div class="big-number" id="numC">0</div>
-      <div class="card-step-row">
-        <button type="button" class="btn-mini-step" data-target="C" data-delta="-1" aria-label="C 감소">−</button>
-        <button type="button" class="btn-mini-step" data-target="C" data-delta="1" aria-label="C 증가">＋</button>
-      </div>
-    </section>
-
-    <!-- X: 병든 봉오리 -->
-    <section class="counter-card card-x" id="cardX">
-      <div class="card-top">
-        <span class="key-tag">X</span>
-        <span class="key-name">병든 봉오리</span>
-      </div>
-      <div class="big-number" id="numX">0</div>
-      <div class="card-step-row">
-        <button type="button" class="btn-mini-step" data-target="X" data-delta="-1" aria-label="X 감소">−</button>
-        <button type="button" class="btn-mini-step" data-target="X" data-delta="1" aria-label="X 증가">＋</button>
-      </div>
-    </section>
-  </main>
-
-  <!-- 하단 계산 바 및 촬영 종료 버튼 -->
-  <div class="rec-footer">
-    <div class="rec-totals-bar">
-      <div class="total-item">과실 (A+B): <b id="recTotalFruit">0</b>개</div>
-      <div class="total-item">봉오리 (C+X): <b id="recTotalBud">0</b>개</div>
-    </div>
-    <button type="button" id="btnStopRecording" class="btn-stop-record">
-      ■ 촬영 종료
-    </button>
-  </div>
-</div>
-
-<!-- ==========================================
-     3. 확인 화면 (CONFIRM VIEW)
-     ========================================== -->
-<div id="viewConfirm" class="view">
-  <div class="confirm-header">
-    <h2>📋 개체 조사 결과 확인</h2>
-  </div>
-
-  <div class="card">
-    <table class="info-table">
-      <tr><td class="label">조사일자</td><td class="val" id="cfmDate">-</td></tr>
-      <tr><td class="label">조사자</td><td class="val" id="cfmResearcher">-</td></tr>
-      <tr><td class="label">농가 / 농장주</td><td class="val" id="cfmFarm">-</td></tr>
-      <tr><td class="label">개체 ID</td><td class="val" id="cfmIndividualId" style="color:#facc15; font-size:18px;">-</td></tr>
-    </table>
-
-    <div class="confirm-items">
-      <div class="confirm-row item-a">
-        <div class="item-desc"><b>A</b><span>건강한 과실</span></div>
-        <div class="item-control">
-          <button type="button" class="btn-confirm-step" data-target="A" data-delta="-1">−</button>
-          <span class="item-val" id="cfmValA">0</span>
-          <button type="button" class="btn-confirm-step" data-target="A" data-delta="1">＋</button>
-        </div>
-      </div>
-
-      <div class="confirm-row item-b">
-        <div class="item-desc"><b>B</b><span>병든 과실</span></div>
-        <div class="item-control">
-          <button type="button" class="btn-confirm-step" data-target="B" data-delta="-1">−</button>
-          <span class="item-val" id="cfmValB">0</span>
-          <button type="button" class="btn-confirm-step" data-target="B" data-delta="1">＋</button>
-        </div>
-      </div>
-
-      <div class="confirm-row item-c">
-        <div class="item-desc"><b>C</b><span>건강한 봉오리</span></div>
-        <div class="item-control">
-          <button type="button" class="btn-confirm-step" data-target="C" data-delta="-1">−</button>
-          <span class="item-val" id="cfmValC">0</span>
-          <button type="button" class="btn-confirm-step" data-target="C" data-delta="1">＋</button>
-        </div>
-      </div>
-
-      <div class="confirm-row item-x">
-        <div class="item-desc"><b>X</b><span>병든 봉오리</span></div>
-        <div class="item-control">
-          <button type="button" class="btn-confirm-step" data-target="X" data-delta="-1">−</button>
-          <span class="item-val" id="cfmValX">0</span>
-          <button type="button" class="btn-confirm-step" data-target="X" data-delta="1">＋</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="confirm-totals-box">
-      <div><span>조사 과실 수 (A + B):</span> <span id="cfmTotalFruit" style="color:#38bdf8;">0 개</span></div>
-      <div><span>조사 봉오리 수 (C + X):</span> <span id="cfmTotalBud" style="color:#38bdf8;">0 개</span></div>
-    </div>
-
-    <div class="form-group">
-      <label for="cfmNote">비고 (필요 시 특이사항 기재)</label>
-      <textarea id="cfmNote" class="note-input" placeholder="음성 메모 또는 특이사항"></textarea>
-    </div>
-
-    <div class="confirm-actions">
-      <button type="button" id="btnBackToRecord" class="btn-back-rec">↩ 촬영으로 복귀</button>
-      <button type="button" id="btnConfirmSave" class="btn-confirm-save">✓ 확정 · 저장</button>
-    </div>
-  </div>
-</div>
+  <div id="saveStatus" class="save-status-msg" style="display:none;"></div>
+</footer>
 
 <script>
-// ==========================================
-// 1. 상수 매핑 및 상태 관리
-// ==========================================
+// ============================================================================
+// API 설정 및 세션 키 상수 정의 (테스트 전용 환경)
+// ============================================================================
+// [운영 배포]: 실제 운영 Worker(eggplant-field-survey-api) URL을 기본 사용합니다.
+const DEPLOYED_PROD_WORKER_URL = 'https://eggplant-field-survey-api.brandonjungtae-kim.workers.dev';
+const APP_BUILD_VERSION = 'v1.0.0-prod-20261124';
+
+function sanitizeProdApiUrl(urlStr) {
+  if (!urlStr || typeof urlStr !== 'string') return null;
+  const trimmed = urlStr.trim().replace(/\/+$/, '');
+  if (!trimmed) return null;
+  if (trimmed.includes('eggplant-field-survey-api-test') || trimmed.includes('eggplant-field-survey-api-candidate')) {
+    console.error('[보안 경고] 테스트/후보 Worker 주소는 운영 화면에서 사용할 수 없습니다:', trimmed);
+    return null;
+  }
+  return trimmed;
+}
+
+function getApiBase() {
+  try {
+    const urlParam = new URLSearchParams(window.location.search).get('apiUrl');
+    const sanitizedParam = sanitizeProdApiUrl(urlParam);
+    if (sanitizedParam) return sanitizedParam;
+
+    const storedUrl = localStorage.getItem('eggplant_prod_api_url');
+    const sanitizedStored = sanitizeProdApiUrl(storedUrl);
+    if (sanitizedStored) return sanitizedStored;
+  } catch (e) {}
+
+  const sanitizedConst = sanitizeProdApiUrl(DEPLOYED_PROD_WORKER_URL);
+  if (sanitizedConst) return sanitizedConst;
+
+  return DEPLOYED_PROD_WORKER_URL;
+}
+
+function getLoginUrl() {
+  const base = getApiBase();
+  return base ? `${base}/auth/login` : null;
+}
+
+function getMeUrl() {
+  const base = getApiBase();
+  return base ? `${base}/auth/me` : null;
+}
+
+function getRecordsUrl() {
+  const base = getApiBase();
+  return base ? `${base}/records` : null;
+}
+
+const API_BASE = getApiBase() || '';
+const LOGIN_URL = getLoginUrl() || '';
+const ME_URL = getMeUrl() || '';
+const RECORDS_URL = getRecordsUrl() || '';
+
+const TOKEN_STORAGE_KEY = 'eggplant_auth_jwt';
+const USER_STORAGE_KEY = 'eggplant_auth_user';
+const DRAFT_STORAGE_KEY = 'eggplant_survey_active_draft_v1';
+const SYNCED_BACKUP_KEY = 'eggplant_survey_synced_records_v1';
+
+// 농가 매핑
 const FARM_OWNERS = {
   G1: '윤종우',
   G2: '안철우',
@@ -795,27 +1468,702 @@ const FARM_OWNERS = {
   G6: '박기환'
 };
 
-// 현재 조사 중인 개체 세션 데이터
-const sessionData = {
-  surveyDate: '',
-  researcherId: 'R1',
-  farmId: 'G1',
-  farmerName: '윤종우',
-  individualId: '',
-  counts: { A: 0, B: 0, C: 0, X: 0 },
-  note: ''
-};
-
-// 음성인식 및 Wake Lock 상태
-let isRecording = false;
+// 카운터 상태 관리 (A, B, C, X)
+const counts = { A: 0, B: 0, C: 0, X: 0 };
+let isUserListening = false;
+let isFastMode = true;
 let recognition = null;
 let restartTimeout = null;
-let wakeLock = null;
 const segmentConsumedCounts = {};
+
+// 저장 중 잠금 및 백업 보호 플래그
+let isSaving = false;
+let isDraftProtected = false;
+let wasListeningBeforeSave = false;
+let lastSuggestedIndividualId = null; // 저장 성공 후 자동 제안된 다음 개체번호 (미작업 상태 구분용)
 
 const $ = id => document.getElementById(id);
 
-// 로컬 날짜(YYYY-MM-DD) 반환
+// ============================================================================
+// 1. 조사 데이터 백업 및 복원 관리
+// ============================================================================
+
+// 저장 요청 중 모든 입력 제어 잠금/해제
+function setSurveyControlsLocked(locked) {
+  // 카운트 +/- 버튼
+  document.querySelectorAll('.step-btn').forEach(btn => {
+    btn.disabled = locked;
+  });
+
+  // 상단 헤더 버튼
+  const startBtn = $('startBtn');
+  const stopBtn = $('stopBtn');
+  const resetBtn = $('resetBtn');
+  const modeBtn = $('modeToggleBtn');
+  if (startBtn) startBtn.disabled = locked;
+  if (stopBtn) stopBtn.disabled = locked;
+  if (resetBtn) resetBtn.disabled = locked;
+  if (modeBtn) modeBtn.disabled = locked;
+
+  // 메타데이터 입력 필드
+  const surveyDate = $('surveyDate');
+  const farmId = $('farmId');
+  const individualId = $('individualId');
+  const note = $('note');
+  if (surveyDate) surveyDate.disabled = locked;
+  if (farmId) farmId.disabled = locked;
+  if (individualId) individualId.disabled = locked;
+  if (note) note.disabled = locked;
+
+  // 조사자 변경 버튼
+  const changeUserBtn = document.querySelector('.btn-change-user');
+  if (changeUserBtn) changeUserBtn.disabled = locked;
+
+  // 저장 버튼
+  const saveBtn = $('btnSaveNext');
+  if (saveBtn) {
+    saveBtn.disabled = locked;
+    if (locked) {
+      saveBtn.dataset.origHtml = saveBtn.innerHTML;
+      saveBtn.textContent = '⏳ 저장 중...';
+    } else if (saveBtn.dataset.origHtml) {
+      saveBtn.innerHTML = saveBtn.dataset.origHtml;
+    }
+  }
+
+  // 음성 인식 일시 정지/재개
+  if (locked) {
+    if (isUserListening) {
+      wasListeningBeforeSave = true;
+      isUserListening = false;
+      clearTimeout(restartTimeout);
+      if (recognition) {
+        try { recognition.stop(); } catch (e) {}
+      }
+      updateMicUI(false);
+    }
+  } else {
+    if (wasListeningBeforeSave) {
+      wasListeningBeforeSave = false;
+      isUserListening = true;
+      if (recognition) {
+        try { recognition.start(); } catch (e) {}
+      }
+    }
+  }
+}
+
+// 미저장 데이터 보호 배너 표시/숨김
+function showDraftProtectionBanner(draft) {
+  const banner = $('draftProtectionBanner');
+  const info = $('draftProtInfo');
+  if (!banner || !info) return;
+
+  const totalFruit = (draft?.counts?.A || 0) + (draft?.counts?.B || 0);
+  const totalBud = (draft?.counts?.C || 0) + (draft?.counts?.X || 0);
+  info.textContent = `⚠ [${draft?.researcherId || '이전'}] 조사자의 미저장 작업(개체: ${draft?.individualId || '미입력'}, 과실: ${totalFruit}, 봉오리: ${totalBud})이 보관 중입니다. 새 데이터 덮어쓰기가 방지되어 있습니다.`;
+  banner.style.display = 'flex';
+}
+
+function hideDraftProtectionBanner() {
+  const banner = $('draftProtectionBanner');
+  if (banner) banner.style.display = 'none';
+}
+
+// 보호된 미저장 데이터 복원 (조사자 인증 일치 검증)
+function restoreProtectedDraft() {
+  const draft = getActiveDraft();
+  if (!draft) {
+    hideDraftProtectionBanner();
+    isDraftProtected = false;
+    return;
+  }
+
+  counts.A = draft.counts?.A || 0;
+  counts.B = draft.counts?.B || 0;
+  counts.C = draft.counts?.C || 0;
+  counts.X = draft.counts?.X || 0;
+  if (draft.surveyDate && $('surveyDate')) $('surveyDate').value = draft.surveyDate;
+  if (draft.farmId && $('farmId')) $('farmId').value = draft.farmId;
+  if ($('individualId')) $('individualId').value = draft.individualId || '';
+  if ($('note')) $('note').value = draft.note || '';
+  lastSuggestedIndividualId = null;
+
+  updateUI();
+  isDraftProtected = false;
+  hideDraftProtectionBanner();
+
+  const currentToken = getAuthToken();
+  const currentLoggedIn = getLoggedInUser();
+
+  // 실제 인증된 JWT 조사자와 draft 조사자가 일치하는지 확인
+  if (!currentToken || currentLoggedIn !== draft.researcherId) {
+    clearAuthToken();
+    setLoggedInUser(draft.researcherId);
+    showLoginModal(draft.researcherId, `[${draft.researcherId}] 조사자의 데이터 복원을 위해 PIN을 입력하여 로그인하세요.`, true);
+    showSaveStatus(`⚠ [${draft.researcherId}] 계정 인증이 필요합니다. 로그인 후 저장하세요.`, 'warn');
+  } else {
+    showSaveStatus(`✓ [${draft.researcherId}] 이전 미저장 데이터가 복원되었습니다.`, 'success');
+  }
+}
+
+// 보호된 미저장 데이터 영구 폐기
+function discardProtectedDraft() {
+  if (confirm('보관 중인 이전 미저장 데이터를 영구히 폐기하시겠습니까?\n폐기 후에는 복구할 수 없습니다.')) {
+    discardActiveDraft();
+    isDraftProtected = false;
+    hideDraftProtectionBanner();
+    showSaveStatus('이전 미저장 데이터가 폐기되었습니다. 새로운 조사를 시작할 수 있습니다.', 'info');
+  }
+}
+
+// 현재 화면에 작성 중인 미저장 데이터가 존재하는지 검사
+function hasUnsavedData() {
+  const hasCounts = counts.A > 0 || counts.B > 0 || counts.C > 0 || counts.X > 0;
+  const hasNote = $('note').value.trim() !== '';
+  const currentIndId = $('individualId').value.trim();
+  // 사용자가 직접 입력한 개체 ID인지 확인 (저장 직후 자동 제안된 개체번호만 단독으로 있는 경우는 미저장 데이터로 보지 않음)
+  const hasUserEnteredId = currentIndId !== '' && currentIndId !== lastSuggestedIndividualId;
+  return hasCounts || hasNote || hasUserEnteredId;
+}
+
+// 작성 중인 미저장 데이터를 기기 localStorage에 자동 보존
+function autoSaveDraft() {
+  // 이전 데이터 보호 모드에서는 새로운 데이터로 기존 draft 덮어쓰기 원천 차단
+  if (isDraftProtected) {
+    return;
+  }
+
+  if (!hasUnsavedData()) {
+    try {
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+    } catch (e) {}
+    return;
+  }
+
+  const currentResearcher = getLoggedInUser();
+  const draft = {
+    researcherId: currentResearcher,
+    surveyDate: $('surveyDate').value || getTodayString(),
+    farmId: $('farmId').value,
+    farmerName: FARM_OWNERS[$('farmId').value] || '',
+    individualId: $('individualId').value.trim(),
+    counts: { ...counts },
+    note: $('note').value.trim(),
+    updatedAt: Date.now()
+  };
+
+  try {
+    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+  } catch (err) {
+    console.error('localStorage draft save error:', err);
+    showSaveStatus('⚠ 기기 저장소 용량 부족 등으로 임시 데이터 자동 보존에 실패했습니다.', 'error');
+  }
+}
+
+// 저장된 활성 임시 데이터 가져오기
+function getActiveDraft() {
+  try {
+    const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+// 임시 데이터 완전히 삭제
+function discardActiveDraft() {
+  try {
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
+  } catch (e) {}
+  counts.A = 0; counts.B = 0; counts.C = 0; counts.X = 0;
+  $('individualId').value = '';
+  $('note').value = '';
+  updateUI();
+  for (const k in segmentConsumedCounts) delete segmentConsumedCounts[k];
+}
+
+// 서버 저장 성공 시 백업 목록에 'synced' 상태로 아카이브 기록
+function markRecordSynced(record) {
+  try {
+    const list = JSON.parse(localStorage.getItem(SYNCED_BACKUP_KEY) || '[]');
+    const recordToSave = {
+      ...record,
+      status: 'synced',
+      syncedAt: new Date().toISOString()
+    };
+    list.unshift(recordToSave);
+    if (list.length > 200) list.pop(); // 최근 200개 보관
+    localStorage.setItem(SYNCED_BACKUP_KEY, JSON.stringify(list));
+  } catch (e) {
+    console.warn('localStorage synced backup failed:', e);
+  }
+}
+
+// ============================================================================
+// 2. 세션 토큰 및 조사자 ID 안전 관리 (콘솔/URL 노출 금지)
+// ============================================================================
+function getAuthToken() {
+  return sessionStorage.getItem(TOKEN_STORAGE_KEY);
+}
+
+function setAuthToken(token, researcherId) {
+  sessionStorage.setItem(TOKEN_STORAGE_KEY, token);
+  sessionStorage.setItem(USER_STORAGE_KEY, researcherId);
+  $('currentUserId').textContent = researcherId;
+}
+
+function clearAuthToken() {
+  sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+  // USER_STORAGE_KEY는 마지막 사용자로 유지하여 재로그인 편의 제공
+}
+
+function getLoggedInUser() {
+  return sessionStorage.getItem(USER_STORAGE_KEY) || 'R1';
+}
+
+function setLoggedInUser(id) {
+  sessionStorage.setItem(USER_STORAGE_KEY, id);
+  $('currentUserId').textContent = id;
+}
+
+// ============================================================================
+// 3. PIN 로그인 모달 및 중복 요청 방지
+// ============================================================================
+let selectedResearcher = 'R1';
+let currentPin = '';
+let isLoggingIn = false;          // 로그인 API 요청 중복 차단 플래그
+let modalLockedResearcher = null; // 미저장 데이터가 있을 때 고정할 조사자 ID
+
+// 조사자 탭 클릭 이벤트
+document.querySelectorAll('#researcherTabs .tab-btn').forEach(btn => {
+  btn.onclick = () => {
+    if (isLoggingIn) return;
+    if (modalLockedResearcher && btn.dataset.id !== modalLockedResearcher) {
+      setAuthMessage(`현재 미저장 데이터는 [${modalLockedResearcher}] 전용입니다. 다른 조사자로 변경하려면 먼저 현재 데이터를 폐기하세요.`, 'warn');
+      return;
+    }
+    document.querySelectorAll('#researcherTabs .tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedResearcher = btn.dataset.id;
+    currentPin = '';
+    $('pinInput').value = '';
+    updatePinDots();
+    setAuthMessage('', '');
+    focusPinInput();
+  };
+});
+
+function focusPinInput() {
+  if (isLoggingIn) return;
+  const input = $('pinInput');
+  if (input) input.focus();
+}
+
+function updatePinDots() {
+  for (let i = 0; i < 6; i++) {
+    const dot = $(`dot${i}`);
+    if (dot) {
+      if (i < currentPin.length) {
+        dot.classList.add('filled');
+      } else {
+        dot.classList.remove('filled');
+      }
+    }
+  }
+  $('btnLoginSubmit').disabled = isLoggingIn || currentPin.length !== 6;
+}
+
+function pressPinKey(digit) {
+  if (isLoggingIn) return;
+  if (currentPin.length < 6) {
+    currentPin += digit;
+    updatePinDots();
+    if (currentPin.length === 6) {
+      submitLogin();
+    }
+  }
+}
+
+function deletePinKey() {
+  if (isLoggingIn) return;
+  if (currentPin.length > 0) {
+    currentPin = currentPin.slice(0, -1);
+    updatePinDots();
+    setAuthMessage('', '');
+  }
+}
+
+function clearPinKey() {
+  if (isLoggingIn) return;
+  currentPin = '';
+  $('pinInput').value = '';
+  updatePinDots();
+  setAuthMessage('', '');
+}
+
+// 소프트 키보드 인풋 연동
+$('pinInput').addEventListener('input', (e) => {
+  if (isLoggingIn) {
+    e.target.value = '';
+    return;
+  }
+  const val = e.target.value.replace(/[^0-9]/g, '');
+  currentPin = val.slice(0, 6);
+  e.target.value = currentPin;
+  updatePinDots();
+  if (currentPin.length === 6) {
+    submitLogin();
+  }
+});
+
+function setAuthMessage(msg, type = 'error') {
+  const el = $('authMsg');
+  el.textContent = msg;
+  el.className = `modal-msg msg-${type}`;
+}
+
+// 로그인 중복 호출 방지를 위한 UI 잠금/해제
+function setLoginUIBusy(busy) {
+  isLoggingIn = busy;
+  const btn = $('btnLoginSubmit');
+  btn.disabled = busy || currentPin.length !== 6;
+  btn.textContent = busy ? '인증 확인 중...' : '로그인';
+  
+  $('pinInput').disabled = busy;
+  document.querySelectorAll('.keypad .key-btn').forEach(b => b.disabled = busy);
+  document.querySelectorAll('#researcherTabs .tab-btn').forEach(b => {
+    if (busy) {
+      b.disabled = true;
+    } else if (modalLockedResearcher) {
+      b.disabled = (b.dataset.id !== modalLockedResearcher);
+    } else {
+      b.disabled = false;
+    }
+  });
+}
+
+function showLoginModal(suggestedUser = null, notice = '', lockToResearcher = false) {
+  const modal = $('authModal');
+  modal.style.display = 'flex';
+  currentPin = '';
+  $('pinInput').value = '';
+  updatePinDots();
+
+  modalLockedResearcher = lockToResearcher ? suggestedUser : null;
+
+  if (suggestedUser) {
+    selectedResearcher = suggestedUser;
+    document.querySelectorAll('#researcherTabs .tab-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.id === suggestedUser);
+      if (lockToResearcher) {
+        b.disabled = (b.dataset.id !== suggestedUser);
+      } else {
+        b.disabled = false;
+      }
+    });
+  } else {
+    document.querySelectorAll('#researcherTabs .tab-btn').forEach(b => b.disabled = false);
+  }
+
+  // 미저장 데이터가 있는 경우 폐기 버튼 노출
+  const extraActions = $('modalExtraActions');
+  if (lockToResearcher && hasUnsavedData()) {
+    extraActions.style.display = 'flex';
+    $('authModalSubtitle').textContent = `[${suggestedUser}] 조사자의 미저장 작업이 진행 중입니다`;
+  } else {
+    extraActions.style.display = 'none';
+    $('authModalSubtitle').textContent = '가지 생육조사를 시작하려면 로그인하세요';
+  }
+
+  if (notice) {
+    setAuthMessage(notice, 'warn');
+  } else {
+    setAuthMessage('', '');
+  }
+  setTimeout(focusPinInput, 100);
+}
+
+function hideLoginModal() {
+  const modal = $('authModal');
+  modal.style.display = 'none';
+  currentPin = '';
+  $('pinInput').value = '';
+  updatePinDots();
+  modalLockedResearcher = null;
+  document.querySelectorAll('#researcherTabs .tab-btn').forEach(b => b.disabled = false);
+}
+
+function confirmDiscardDraftFromModal() {
+  if (confirm('현재 작성 중인 미저장 데이터를 모두 폐기하시겠습니까?\n폐기 후에는 복구할 수 없습니다.')) {
+    discardActiveDraft();
+    modalLockedResearcher = null;
+    $('modalExtraActions').style.display = 'none';
+    $('authModalSubtitle').textContent = '가지 생육조사를 시작하려면 로그인하세요';
+    document.querySelectorAll('#researcherTabs .tab-btn').forEach(b => b.disabled = false);
+    setAuthMessage('미저장 데이터가 폐기되었습니다. 원하는 조사자를 선택해 로그인하세요.', 'info');
+  }
+}
+
+// 조사자 변경 안전 처리 (미저장 데이터 타인 저장 방지)
+function promptChangeUser() {
+  if (isSaving) {
+    showSaveStatus('⏳ 저장 중에는 조사자를 변경할 수 없습니다.', 'warn');
+    return;
+  }
+  if (isDraftProtected) {
+    showSaveStatus('⚠ 이전 미저장 데이터가 보관되어 있습니다. 먼저 복원하거나 폐기하세요.', 'warn');
+    return;
+  }
+  const currentResearcher = getLoggedInUser();
+  if (hasUnsavedData()) {
+    const confirmMsg = `[주의] 현재 [${currentResearcher}] 조사자의 미저장 조사 데이터가 작성 중입니다.\n\n` +
+      `다른 조사자 명의로 이 데이터를 저장할 수 없습니다.\n` +
+      `다른 조사자로 전환하려면 현재 작성 중인 미저장 데이터를 '폐기'해야 합니다.\n\n` +
+      `미저장 데이터를 폐기하고 다른 조사자로 변경하시겠습니까?`;
+
+    if (!confirm(confirmMsg)) {
+      return; // 변경 취소: 현재 조사자 및 데이터 유지
+    }
+
+    // 명시적 동의 시에만 데이터 폐기 후 모달 표시
+    discardActiveDraft();
+    clearAuthToken();
+    showLoginModal(null, '새로운 조사자를 선택하고 로그인하세요.', false);
+  } else {
+    clearAuthToken();
+    showLoginModal(currentResearcher, '새로운 조사자로 로그인하세요.', false);
+  }
+}
+
+// PIN 로그인 제출 (중복 요청 차단 및 PIN 메모리 완전 소거)
+async function submitLogin() {
+  if (isLoggingIn) return; // 중복 요청 차단
+  if (currentPin.length !== 6) {
+    setAuthMessage('6자리 PIN을 모두 입력하세요.', 'warn');
+    return;
+  }
+
+  // 미저장 데이터가 있을 경우 타인 계정 로그인 원천 차단
+  const activeDraft = getActiveDraft();
+  if (activeDraft && hasUnsavedData() && selectedResearcher !== activeDraft.researcherId) {
+    setAuthMessage(`현재 미저장 데이터는 [${activeDraft.researcherId}] 전용입니다. [${activeDraft.researcherId}]로 로그인하거나 데이터를 폐기하세요.`, 'error');
+    return;
+  }
+
+  const targetLoginUrl = getLoginUrl();
+  if (!targetLoginUrl) {
+    setAuthMessage('테스트 Worker URL이 설정되지 않아 로그인을 차단했습니다. (테스트 Worker: eggplant-field-survey-api-test)', 'error');
+    return;
+  }
+
+  setLoginUIBusy(true);
+  setAuthMessage('보안 서버에서 PIN을 검증하는 중...', 'info');
+
+  const payload = {
+    researcherId: selectedResearcher,
+    pin: currentPin
+  };
+
+  try {
+    const res = await fetch(targetLoginUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    let data = null;
+    try {
+      data = await res.json();
+    } catch (e) {}
+
+    if (res.ok && data?.ok && data?.token) {
+      // 로그인 성공
+      setAuthToken(data.token, selectedResearcher);
+      hideLoginModal();
+      if (hasUnsavedData()) {
+        showSaveStatus(`✓ [${selectedResearcher}] 인증 완료 — [저장 + 다음] 버튼을 눌러 저장하세요.`, 'warn');
+      } else {
+        showSaveStatus(`✓ [${selectedResearcher}] 인증 완료 (8시간 유효)`, 'success');
+      }
+      unlockAudioContext();
+    } else if (res.status === 423) {
+      // 15분 계정 잠금
+      const msg = data?.error || '비밀번호 5회 연속 오류로 계정이 15분간 잠겼습니다.';
+      setAuthMessage(msg, 'error');
+    } else if (res.status === 401) {
+      // PIN 불일치
+      let msg = data?.error || '조사자 ID 또는 PIN이 일치하지 않습니다.';
+      if (typeof data?.remainingAttempts === 'number') {
+        msg += ` (남은 시도: ${data.remainingAttempts}회)`;
+      }
+      setAuthMessage(msg, 'error');
+    } else {
+      setAuthMessage(data?.error || '인증 서버 오류가 발생했습니다. 잠시 후 다시 시도하세요.', 'error');
+    }
+  } catch (netErr) {
+    setAuthMessage('네트워크 오류: 서버에 연결할 수 없습니다. 연결 상태를 확인하세요.', 'error');
+  } finally {
+    // [보안 핵심]: 요청 완료 후 PIN 및 입력 필드를 즉시 초기화
+    currentPin = '';
+    const pinInput = $('pinInput');
+    if (pinInput) pinInput.value = '';
+    updatePinDots();
+    setLoginUIBusy(false);
+  }
+}
+
+// ============================================================================
+// 4. Web Audio API 성공 확인 효과음 ('띡', 1000Hz, 85ms, 볼륨/토글 설정 지원)
+// ============================================================================
+let audioCtx = null;
+const SOUND_STORAGE_KEYS = {
+  ENABLED: 'survey_beep_enabled',
+  VOLUME: 'survey_beep_volume'
+};
+
+let isSoundEnabled = true;
+let soundVolume = 0.5; // 기본 50%
+
+function loadSoundSettings() {
+  try {
+    const savedEnabled = localStorage.getItem(SOUND_STORAGE_KEYS.ENABLED);
+    if (savedEnabled !== null) {
+      isSoundEnabled = savedEnabled === 'true';
+    }
+    const savedVol = localStorage.getItem(SOUND_STORAGE_KEYS.VOLUME);
+    if (savedVol !== null) {
+      const parsed = parseFloat(savedVol);
+      if (!isNaN(parsed) && parsed >= 0 && parsed <= 1) {
+        soundVolume = parsed;
+      }
+    }
+  } catch (e) {}
+}
+
+function saveSoundSettings() {
+  try {
+    localStorage.setItem(SOUND_STORAGE_KEYS.ENABLED, String(isSoundEnabled));
+    localStorage.setItem(SOUND_STORAGE_KEYS.VOLUME, soundVolume.toFixed(2));
+  } catch (e) {}
+}
+
+function updateSoundUI() {
+  const toggleBtn = $('soundToggleBtn');
+  const slider = $('soundVolSlider');
+  const label = $('soundVolLabel');
+
+  if (toggleBtn) {
+    if (isSoundEnabled) {
+      toggleBtn.textContent = 'ON';
+      toggleBtn.className = 'sound-toggle-btn sound-on';
+    } else {
+      toggleBtn.textContent = 'OFF';
+      toggleBtn.className = 'sound-toggle-btn';
+    }
+  }
+
+  const volPercent = Math.round(soundVolume * 100);
+  if (slider) {
+    slider.value = volPercent;
+  }
+  if (label) {
+    label.textContent = `${volPercent}%`;
+  }
+}
+
+function unlockAudioContext() {
+  if (!audioCtx) {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (AudioContext) {
+      audioCtx = new AudioContext();
+    }
+  }
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume().catch(() => {});
+  }
+}
+
+function playSuccessBeep(force = false) {
+  if (!force && !isSoundEnabled) return;
+  if (!force && soundVolume <= 0) return;
+
+  if (!audioCtx) unlockAudioContext();
+  if (!audioCtx) return;
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume().catch(() => {});
+  }
+
+  try {
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    // 1000Hz (명료도가 높은 최적 주파수)
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1000, now);
+
+    // 피크 볼륨 제한: 최대치일 때 왜곡 방지를 위해 0.45로 상한 제어
+    const effectiveVol = force && soundVolume <= 0 ? 0.3 : soundVolume;
+    const peakGain = Math.max(0.001, Math.min(0.45, effectiveVol * 0.45));
+
+    // 클릭음(팝 노이즈) 방지 및 부드러운 타격감을 위한 Envelope (Attack 5ms, Decay/Sustain 80ms)
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(peakGain, now + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.085);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.085);
+  } catch (e) {
+    // 오디오 재생 실패가 카운팅 등 상위 비즈니스 로직에 영향을 주지 않도록 안전 격리
+  }
+}
+
+// ============================================================================
+// 4-1. 음성 인식 원문 진단 상태 및 UI 헬퍼 (Step 11-E-2)
+// ============================================================================
+let isDiagEnabled = false;
+
+function updateDiagDisplay(rawText, statusText, statusClass, isFinal) {
+  if (!isDiagEnabled) return;
+  try {
+    const rawEl = $('diagRawText');
+    const statusEl = $('diagStatusText');
+    if (rawEl) {
+      const typeLabel = isFinal ? '[final]' : '[interim]';
+      rawEl.textContent = `${typeLabel} "${rawText || ''}"`;
+      rawEl.className = `diag-val ${isFinal ? 'final' : 'interim'}`;
+    }
+    if (statusEl) {
+      statusEl.textContent = statusText || '-';
+      statusEl.className = `diag-val ${statusClass || ''}`;
+    }
+  } catch (e) {}
+}
+
+function updateDiagUI() {
+  const btn = $('diagToggleBtn');
+  const box = $('diagDisplayBox');
+  if (btn) {
+    if (isDiagEnabled) {
+      btn.textContent = 'ON';
+      btn.className = 'diag-toggle-btn diag-on';
+    } else {
+      btn.textContent = 'OFF';
+      btn.className = 'diag-toggle-btn';
+    }
+  }
+  if (box) {
+    box.style.display = isDiagEnabled ? 'flex' : 'none';
+  }
+}
+
+// ============================================================================
+// 5. 음성 카운팅 및 비즈니스 로직
+// ============================================================================
 function getTodayString() {
   const now = new Date();
   const y = now.getFullYear();
@@ -824,92 +2172,110 @@ function getTodayString() {
   return `${y}-${m}-${d}`;
 }
 
-// 화면 전환 함수
-function switchView(viewName) {
-  $('viewSetup').classList.remove('active');
-  $('viewRecord').classList.remove('active');
-  $('viewConfirm').classList.remove('active');
+function updateUI() {
+  $('numA').textContent = counts.A;
+  $('numB').textContent = counts.B;
+  $('numC').textContent = counts.C;
+  $('numX').textContent = counts.X;
 
-  if (viewName === 'setup') $('viewSetup').classList.add('active');
-  else if (viewName === 'record') $('viewRecord').classList.add('active');
-  else if (viewName === 'confirm') $('viewConfirm').classList.add('active');
+  $('totalFruit').textContent = counts.A + counts.B;
+  $('totalBud').textContent = counts.C + counts.X;
 }
 
-// ==========================================
-// 2. LocalStorage 데이터 저장 및 중복 방지
-// ==========================================
-const STORAGE_KEY_V4 = 'eggplantSurveyV4_records';
+function triggerCount(key, amount = 1) {
+  if (isSaving) {
+    showSaveStatus('⏳ 저장 중에는 카운트를 입력할 수 없습니다.', 'warn');
+    return;
+  }
+  if (isDraftProtected) {
+    showSaveStatus('⚠ 이전 미저장 데이터가 보관되어 있습니다. 먼저 복원하거나 폐기하세요.', 'warn');
+    return;
+  }
+  if (!counts.hasOwnProperty(key)) return;
+  counts[key] = Math.max(0, counts[key] + amount);
+  updateUI();
+  autoSaveDraft(); // 변경 시마다 자동 임시 보존
 
-function loadAllRecords() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY_V4) || '[]');
-  } catch (e) {
-    return [];
+  $('recentLog').textContent = `${key} (+${amount})`;
+
+  if (amount > 0) {
+    playSuccessBeep();
+  }
+
+  const card = $(`card${key}`);
+  if (card) {
+    card.classList.remove('highlight');
+    void card.offsetWidth;
+    card.classList.add('highlight');
+    setTimeout(() => card.classList.remove('highlight'), 250);
+  }
+
+  if (navigator.vibrate) {
+    try { navigator.vibrate(80); } catch (e) {}
   }
 }
 
-function saveRecord(record) {
-  const records = loadAllRecords();
-  // 동일한 날짜 + 농가번호 + 개체ID 레코드가 있으면 덮어쓰기/갱신, 없으면 신규 추가
-  const idx = records.findIndex(r => 
-    r.surveyDate === record.surveyDate && 
-    r.farmId === record.farmId && 
-    r.individualId === record.individualId
-  );
+document.querySelectorAll('.step-btn').forEach(btn => {
+  btn.onclick = (e) => {
+    e.stopPropagation();
+    if (isSaving || isDraftProtected) return;
+    unlockAudioContext();
+    const target = btn.dataset.target;
+    const delta = +btn.dataset.delta;
+    triggerCount(target, delta);
+  };
+});
 
-  if (idx >= 0) {
-    records[idx] = record;
+$('resetBtn').onclick = () => {
+  if (isSaving) {
+    showSaveStatus('⏳ 저장 중에는 초기화할 수 없습니다.', 'warn');
+    return;
+  }
+  if (isDraftProtected) {
+    showSaveStatus('⚠ 이전 미저장 데이터가 보관되어 있습니다. 먼저 복원하거나 폐기하세요.', 'warn');
+    return;
+  }
+  if (confirm('모든 카운트를 0으로 초기화할까요?')) {
+    counts.A = 0; counts.B = 0; counts.C = 0; counts.X = 0;
+    $('recentLog').textContent = '-';
+    for (const k in segmentConsumedCounts) delete segmentConsumedCounts[k];
+    updateUI();
+    autoSaveDraft();
+  }
+};
+
+$('modeToggleBtn').onclick = () => {
+  isFastMode = !isFastMode;
+  const btn = $('modeToggleBtn');
+  const icon = $('modeIcon');
+  const text = $('modeText');
+
+  if (isFastMode) {
+    btn.className = 'mode-toggle-btn mode-fast';
+    icon.textContent = '⚡';
+    text.textContent = 'FAST MODE ON';
+    $('recentLog').textContent = 'FAST 모드 전환 (실시간)';
   } else {
-    records.push(record);
+    btn.className = 'mode-toggle-btn mode-normal';
+    icon.textContent = '🐢';
+    text.textContent = 'NORMAL (침묵후)';
+    $('recentLog').textContent = 'NORMAL 모드 전환 (침묵대기)';
   }
-  localStorage.setItem(STORAGE_KEY_V4, JSON.stringify(records));
-  updateTodayCountUI();
-}
+};
 
-function isDuplicateRecord(date, farmId, indId) {
-  const records = loadAllRecords();
-  return records.some(r => 
-    r.surveyDate === date && 
-    r.farmId === farmId && 
-    r.individualId === indId
-  );
-}
-
-function updateTodayCountUI() {
-  const records = loadAllRecords();
-  const curDate = $('setupDate').value || getTodayString();
-  const todayRecords = records.filter(r => r.surveyDate === curDate);
-  $('todayCount').textContent = todayRecords.length;
-}
-
-// ==========================================
-// 3. Screen Wake Lock 관리
-// ==========================================
-async function requestWakeLock() {
-  try {
-    if ('wakeLock' in navigator) {
-      wakeLock = await navigator.wakeLock.request('screen');
-    }
-  } catch (err) {
-    console.log('Wake Lock request error:', err);
-  }
-}
-
-async function releaseWakeLock() {
-  try {
-    if (wakeLock) {
-      await wakeLock.release();
-      wakeLock = null;
-    }
-  } catch (err) {
-    console.log('Wake Lock release error:', err);
-  }
-}
-
-// ==========================================
-// 4. voice-test.html 검증 FAST MODE 음성 인식
-// ==========================================
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+function updateMicUI(listening) {
+  const badge = $('micStatus');
+  const text = $('micText');
+  if (listening) {
+    badge.className = 'mic-badge mic-listening';
+    text.textContent = 'LISTENING';
+  } else {
+    badge.className = 'mic-badge mic-off';
+    text.textContent = 'OFF';
+  }
+}
 
 function parseSpeechCommands(text) {
   const clean = text.toLowerCase().trim();
@@ -947,33 +2313,66 @@ function parseSpeechCommands(text) {
 
 function initRecognition() {
   if (!SpeechRecognition) {
-    alert('이 브라우저는 음성 인식을 지원하지 않습니다. Android Chrome 또는 iOS Safari를 권장합니다.');
+    alert('이 브라우저는 Web Speech API를 지원하지 않습니다.\nAndroid Chrome 또는 iOS Safari 최신 버전을 사용해주세요.');
     return null;
   }
 
   const rec = new SpeechRecognition();
   rec.lang = 'ko-KR';
   rec.continuous = true;
-  rec.interimResults = true; // FAST MODE 활성화
+  rec.interimResults = true;
   rec.maxAlternatives = 1;
 
+  rec.onstart = () => updateMicUI(true);
+
   rec.onresult = (event) => {
-    if (!isRecording) return;
     for (let i = event.resultIndex; i < event.results.length; ++i) {
       const res = event.results[i];
       const isFinal = res.isFinal;
       const transcript = res[0].transcript;
       const parsedTokens = parseSpeechCommands(transcript);
 
-      const alreadyConsumed = segmentConsumedCounts[i] || 0;
-      if (parsedTokens.length > alreadyConsumed) {
-        const newTokens = parsedTokens.slice(alreadyConsumed);
-        newTokens.forEach(cmd => triggerCount(cmd, 1));
-        segmentConsumedCounts[i] = parsedTokens.length;
+      // 진단 표시 업데이트 (오류 격리)
+      if (isDiagEnabled) {
+        try {
+          if (parsedTokens.length === 0) {
+            updateDiagDisplay(transcript.trim(), '매핑 안 됨 (사전 미일치)', 'unmapped', isFinal);
+          } else if (isFastMode) {
+            const alreadyConsumed = segmentConsumedCounts[i] || 0;
+            if (parsedTokens.length > alreadyConsumed) {
+              const newTokens = parsedTokens.slice(alreadyConsumed);
+              updateDiagDisplay(transcript.trim(), `카운트 성공: [${newTokens.join(', ')}]`, 'final', isFinal);
+            } else {
+              updateDiagDisplay(transcript.trim(), `중복 방지 (이미 처리됨 ${alreadyConsumed}건)`, 'consumed', isFinal);
+            }
+          } else {
+            if (isFinal) {
+              updateDiagDisplay(transcript.trim(), `카운트 성공: [${parsedTokens.join(', ')}]`, 'final', true);
+            } else {
+              updateDiagDisplay(transcript.trim(), `인식 중 (침묵 대기: [${parsedTokens.join(', ')}])`, 'interim', false);
+            }
+          }
+        } catch (diagErr) {}
       }
 
-      if (isFinal) {
-        segmentConsumedCounts[i] = Math.max(segmentConsumedCounts[i] || 0, parsedTokens.length);
+      if (isFastMode) {
+        const alreadyConsumed = segmentConsumedCounts[i] || 0;
+        if (parsedTokens.length > alreadyConsumed) {
+          const newTokens = parsedTokens.slice(alreadyConsumed);
+          newTokens.forEach(cmd => triggerCount(cmd, 1));
+          segmentConsumedCounts[i] = parsedTokens.length;
+        }
+        if (isFinal) {
+          segmentConsumedCounts[i] = Math.max(segmentConsumedCounts[i] || 0, parsedTokens.length);
+        }
+      } else {
+        if (isFinal) {
+          if (parsedTokens.length > 0) {
+            parsedTokens.forEach(cmd => triggerCount(cmd, 1));
+          } else {
+            $('recentLog').textContent = `미인식: "${transcript.trim()}"`;
+          }
+        }
       }
     }
   };
@@ -981,22 +2380,20 @@ function initRecognition() {
   rec.onerror = (event) => {
     console.warn('Speech recognition error:', event.error);
     if (event.error === 'not-allowed') {
-      alert('마이크 사용 권한이 필요합니다. 브라우저 설정에서 마이크를 허용해주세요.');
-      stopRecording();
+      alert('마이크 사용 권한이 거부되었습니다. 브라우저 설정에서 마이크를 허용해주세요.');
+      isUserListening = false;
+      updateMicUI(false);
     }
   };
 
   rec.onend = () => {
-    // 촬영 모드가 켜져 있는 동안 음성인식이 끊어지면 자동 재시작
-    if (isRecording) {
+    updateMicUI(false);
+    if (isSaving) return; // 저장 중 자동 재시작 방지
+    if (isUserListening) {
       clearTimeout(restartTimeout);
       restartTimeout = setTimeout(() => {
-        if (isRecording) {
-          try {
-            rec.start();
-          } catch (e) {
-            console.log('재시작 시도 중:', e);
-          }
+        if (isUserListening && !isSaving) {
+          try { rec.start(); } catch (e) {}
         }
       }, 250);
     }
@@ -1005,251 +2402,485 @@ function initRecognition() {
   return rec;
 }
 
-function triggerCount(key, amount = 1) {
-  if (!sessionData.counts.hasOwnProperty(key)) return;
-  sessionData.counts[key] = Math.max(0, sessionData.counts[key] + amount);
-  updateRecordUI();
-
-  // 하이라이트 애니메이션
-  const card = $(`card${key}`);
-  if (card) {
-    card.classList.remove('highlight');
-    void card.offsetWidth;
-    card.classList.add('highlight');
-    setTimeout(() => card.classList.remove('highlight'), 250);
+$('startBtn').onclick = () => {
+  if (isSaving) {
+    showSaveStatus('⏳ 저장 중에는 음성 인식을 시작할 수 없습니다.', 'warn');
+    return;
   }
-
-  // 햅틱 진동 피드백
-  if (navigator.vibrate) {
-    try { navigator.vibrate(80); } catch (e) {}
+  if (isDraftProtected) {
+    showSaveStatus('⚠ 이전 미저장 데이터가 보관되어 있습니다. 먼저 복원하거나 폐기하세요.', 'warn');
+    return;
   }
-}
-
-function updateRecordUI() {
-  $('numA').textContent = sessionData.counts.A;
-  $('numB').textContent = sessionData.counts.B;
-  $('numC').textContent = sessionData.counts.C;
-  $('numX').textContent = sessionData.counts.X;
-
-  const totalFruit = sessionData.counts.A + sessionData.counts.B;
-  const totalBud = sessionData.counts.C + sessionData.counts.X;
-
-  $('recTotalFruit').textContent = totalFruit;
-  $('recTotalBud').textContent = totalBud;
-}
-
-// 수동 + / - 버튼 조작 (촬영 모드)
-document.querySelectorAll('.btn-mini-step').forEach(btn => {
-  btn.onclick = (e) => {
-    e.stopPropagation();
-    const target = btn.dataset.target;
-    const delta = +btn.dataset.delta;
-    triggerCount(target, delta);
-  };
-});
-
-// ==========================================
-// 5. 준비 화면 이벤트 및 촬영 시작
-// ==========================================
-function updateFarmerName() {
-  const farm = $('farmId').value;
-  $('farmerName').value = FARM_OWNERS[farm] || '';
-}
-
-$('farmId').addEventListener('change', updateFarmerName);
-
-$('setupDate').value = getTodayString();
-updateFarmerName();
-updateTodayCountUI();
-
-$('btnStartRecording').onclick = () => {
-  const date = $('setupDate').value;
-  const researcher = $('researcherId').value;
-  const farm = $('farmId').value;
-  const farmer = $('farmerName').value;
-  const individualId = $('individualId').value.trim();
-
-  if (!date) { alert('조사일자를 선택해주세요.'); return; }
-  if (!researcher) { alert('조사자를 선택해주세요.'); return; }
-  if (!farm) { alert('농가번호를 선택해주세요.'); return; }
-  if (!individualId) { alert('개체 ID를 직접 입력해주세요.'); $('individualId').focus(); return; }
-
-  // 중복 검사
-  if (isDuplicateRecord(date, farm, individualId)) {
-    const override = confirm(`⚠️ [${date} / ${farm} / ${individualId}] 개체는 이미 조사된 기록이 있습니다.\n\n다시 촬영하여 기존 데이터를 덮어쓰시겠습니까?`);
-    if (!override) return;
-  }
-
-  // 세션 설정
-  sessionData.surveyDate = date;
-  sessionData.researcherId = researcher;
-  sessionData.farmId = farm;
-  sessionData.farmerName = farmer;
-  sessionData.individualId = individualId;
-  sessionData.counts = { A: 0, B: 0, C: 0, X: 0 };
-  sessionData.note = '';
-
-  // 촬영 화면 메타 배지 갱신
-  $('recBadgeLine').textContent = `${researcher} | ${farm} | ${individualId}`;
-  $('recFarmerLine').textContent = farmer;
-  updateRecordUI();
-
-  // 음성인식 초기화 및 시작
+  unlockAudioContext();
   if (!recognition) {
     recognition = initRecognition();
     if (!recognition) return;
   }
-
+  isUserListening = true;
   for (const k in segmentConsumedCounts) delete segmentConsumedCounts[k];
-  isRecording = true;
-
-  try {
-    recognition.start();
-  } catch (e) {}
-
-  requestWakeLock();
-  switchView('record');
+  try { recognition.start(); } catch (e) {}
 };
 
-// ==========================================
-// 6. 촬영 종료 및 확인 화면 전환
-// ==========================================
-function stopRecording() {
-  isRecording = false;
+$('stopBtn').onclick = () => {
+  isUserListening = false;
   clearTimeout(restartTimeout);
-  releaseWakeLock();
   if (recognition) {
     try { recognition.stop(); } catch (e) {}
   }
-}
-
-$('btnStopRecording').onclick = () => {
-  stopRecording();
-  openConfirmView();
+  updateMicUI(false);
 };
 
-function openConfirmView() {
-  $('cfmDate').textContent = sessionData.surveyDate;
-  $('cfmResearcher').textContent = sessionData.researcherId;
-  $('cfmFarm').textContent = `${sessionData.farmId} (${sessionData.farmerName})`;
-  $('cfmIndividualId').textContent = sessionData.individualId;
-
-  updateConfirmValuesUI();
-  $('cfmNote').value = sessionData.note;
-
-  switchView('confirm');
-}
-
-function updateConfirmValuesUI() {
-  $('cfmValA').textContent = sessionData.counts.A;
-  $('cfmValB').textContent = sessionData.counts.B;
-  $('cfmValC').textContent = sessionData.counts.C;
-  $('cfmValX').textContent = sessionData.counts.X;
-
-  const totalFruit = sessionData.counts.A + sessionData.counts.B;
-  const totalBud = sessionData.counts.C + sessionData.counts.X;
-
-  $('cfmTotalFruit').textContent = `${totalFruit} 개`;
-  $('cfmTotalBud').textContent = `${totalBud} 개`;
-}
-
-// 확인 화면 내 + / - 보정 버튼
-document.querySelectorAll('.btn-confirm-step').forEach(btn => {
-  btn.onclick = () => {
-    const target = btn.dataset.target;
-    const delta = +btn.dataset.delta;
-    sessionData.counts[target] = Math.max(0, sessionData.counts[target] + delta);
-    updateConfirmValuesUI();
-  };
+// 메타데이터 입력 변경 시 자동 임시 보존
+$('individualId').addEventListener('input', () => {
+  if ($('individualId').value.trim() !== lastSuggestedIndividualId) {
+    lastSuggestedIndividualId = null;
+  }
+  autoSaveDraft();
 });
+$('note').addEventListener('input', autoSaveDraft);
+$('farmId').addEventListener('change', autoSaveDraft);
+$('surveyDate').addEventListener('change', autoSaveDraft);
 
-// 촬영으로 복귀
-$('btnBackToRecord').onclick = () => {
-  updateRecordUI();
-  isRecording = true;
-  for (const k in segmentConsumedCounts) delete segmentConsumedCounts[k];
-  try { recognition.start(); } catch (e) {}
-  requestWakeLock();
-  switchView('record');
-};
+// ============================================================================
+// 6. 데이터 저장 및 에러별 안전 처리 (POST /records)
+// ============================================================================
+let statusHideTimeout = null;
 
-// ==========================================
-// 7. 확정 · 저장 및 다음 개체 준비
-// ==========================================
-$('btnConfirmSave').onclick = () => {
-  const healthyFruit = sessionData.counts.A;
-  const sickFruit = sessionData.counts.B;
-  const healthyBud = sessionData.counts.C;
-  const sickBud = sessionData.counts.X;
+function showSaveStatus(text, type) {
+  const el = $('saveStatus');
+  el.style.display = 'block';
+  el.textContent = text;
+  el.className = `save-status-msg status-${type}`;
 
-  const totalFruit = healthyFruit + sickFruit;
-  const totalBud = healthyBud + sickBud;
-
-  const record = {
-    surveyDate: sessionData.surveyDate,
-    researcherId: sessionData.researcherId,
-    farmId: sessionData.farmId,
-    farmerName: sessionData.farmerName,
-    individualId: sessionData.individualId,
-    healthyFruit: healthyFruit,
-    sickFruit: sickFruit,
-    healthyBud: healthyBud,
-    sickBud: sickBud,
-    totalFruit: totalFruit,
-    totalBud: totalBud,
-    diseaseRate: '', // 발병률 빈값 유지
-    note: $('cfmNote').value.trim(),
-    createdAt: new Date().toISOString()
-  };
-
-  saveRecord(record);
-
-  // [다음 개체를 위한 상태 복귀]
-  // 조사일자, 조사자, 농가번호, 농장주는 그대로 유지하고 개체ID만 비움
-  $('individualId').value = '';
-  sessionData.counts = { A: 0, B: 0, C: 0, X: 0 };
-  sessionData.note = '';
-
-  switchView('setup');
-  $('individualId').focus();
-};
-
-// ==========================================
-// 8. CSV 내보내기 기능
-// ==========================================
-function esc(v) {
-  v = String(v ?? '');
-  return '"' + v.replaceAll('"', '""') + '"';
+  clearTimeout(statusHideTimeout);
+  statusHideTimeout = setTimeout(() => {
+    el.style.display = 'none';
+  }, 5000);
 }
 
-$('btnExportCsv').onclick = () => {
-  const records = loadAllRecords();
-  if (records.length === 0) {
-    alert('저장된 조사 데이터가 없습니다.');
+$('btnSaveNext').onclick = async () => {
+  if (isSaving) return;
+  if (isDraftProtected) {
+    showSaveStatus('⚠ 이전 미저장 데이터가 보관되어 있습니다. 상단 배너에서 먼저 복원하거나 폐기하세요.', 'warn');
     return;
   }
 
-  const headers = [
-    '조사일자', '조사자', '농가번호', '농장주', '개체ID',
-    '건강한 과실(A)', '병든 과실(B)', '조사 과실 수(A+B)',
-    '건강한 봉오리(C)', '병든 봉오리(X)', '조사 봉오리 수(C+X)',
-    '발병률(%)', '비고', '등록일시'
-  ];
+  unlockAudioContext();
 
-  let lines = [headers.map(esc).join(',')];
+  const token = getAuthToken();
+  const currentResearcher = getLoggedInUser();
 
+  if (!token) {
+    showSaveStatus('⚠ 로그인이 필요합니다. PIN을 입력하세요.', 'warn');
+    showLoginModal(currentResearcher, '저장하려면 먼저 로그인하세요.', hasUnsavedData());
+    return;
+  }
+
+  const indId = $('individualId').value.trim();
+  if (!indId) {
+    showSaveStatus('⚠ 개체 ID를 입력해주세요.', 'warn');
+    $('individualId').focus();
+    return;
+  }
+
+  // [원칙 3]: 조사자 ID 일치 검증 (기존 조사자 연결 데이터가 다른 조사자 명의로 저장되는 것 원천 차단)
+  const activeDraft = getActiveDraft();
+  if (activeDraft && activeDraft.researcherId && activeDraft.researcherId !== currentResearcher) {
+    showSaveStatus(`⚠ 이 데이터는 [${activeDraft.researcherId}] 조사자의 데이터입니다. [${currentResearcher}] 명의로 저장할 수 없습니다.`, 'error');
+    return;
+  }
+
+  const farmId = $('farmId').value;
+  const farmerName = FARM_OWNERS[farmId] || '';
+  const surveyDate = $('surveyDate').value || getTodayString();
+  const noteVal = $('note').value.trim();
+
+  // POST 데이터 페이로드 생성
+  const payload = {
+    surveyDate: surveyDate,
+    researcherId: currentResearcher,
+    farmId: farmId,
+    farmerName: farmerName,
+    individualId: indId,
+    healthyFruit: counts.A,
+    sickFruit: counts.B,
+    healthyBud: counts.C,
+    sickBud: counts.X,
+    diseaseRate: null,
+    note: noteVal
+  };
+
+  const targetRecordsUrl = getRecordsUrl();
+  if (!targetRecordsUrl) {
+    showSaveStatus('⚠ 테스트 Worker URL이 설정되지 않아 저장을 차단했습니다. (테스트 Worker: eggplant-field-survey-api-test)', 'error');
+    return;
+  }
+
+  // 요청 전 기기 로컬에 임시 보존 보장
+  autoSaveDraft();
+
+  // [원칙 1]: 저장 중 입력 완전 잠금
+  isSaving = true;
+  setSurveyControlsLocked(true);
+  showSaveStatus('⏳ 서버에 저장 중입니다. 잠시만 기다려주세요...', 'warn');
+
+  try {
+    const res = await fetch(targetRecordsUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    let resData = null;
+    try {
+      resData = await res.json();
+    } catch (e) {
+      // JSON 파싱 실패 시 resData는 null 유지
+    }
+
+    // [원칙 2]: 저장 성공 판정 - HTTP 2xx 및 서버의 명시적 ok: true 확인
+    const isExplicitSuccess = (res.status === 200 || res.status === 201) && res.ok && resData && resData.ok === true;
+
+    if (isExplicitSuccess) {
+      // [1] 저장 성공:
+      showSaveStatus(`✓ [${currentResearcher}] ${indId} 저장 완료`, 'success');
+
+      // 서버 저장 성공 확인되었으므로 활성 임시 데이터 제거 및 완료 아카이브 기록
+      discardActiveDraft();
+      markRecordSynced(payload);
+
+      // 다음 개체번호 제안 (예: 1-1 -> 1-2)
+      const parts = indId.split('-');
+      if (parts.length === 2 && !isNaN(parts[1])) {
+        const nextId = `${parts[0]}-${parseInt(parts[1], 10) + 1}`;
+        $('individualId').value = nextId;
+        lastSuggestedIndividualId = nextId;
+      } else {
+        $('individualId').value = '';
+        lastSuggestedIndividualId = null;
+      }
+      $('individualId').focus();
+
+    } else if (res.status === 401) {
+      // [2] 401 토큰 만료:
+      // 데이터는 100% 보존하고, 동일 조사자 전용으로 재로그인 모달 표시!
+      showSaveStatus('⚠ 인증 세션 만료 — 현재 데이터는 보존되었습니다. 다시 로그인하세요.', 'warn');
+      clearAuthToken();
+      showLoginModal(currentResearcher, `[${currentResearcher}] 세션이 만료되었습니다. PIN 재로그인 후 [저장 + 다음] 버튼을 다시 누르세요.`, true);
+
+    } else if (resData && (resData.duplicate === true || res.status === 409)) {
+      // [3] 409 중복 개체:
+      // 카운터 및 데이터 절대 보존, 개체번호 수정 안내
+      showSaveStatus(`⚠ 개체 ${indId}은(는) 이미 조사되었습니다. 개체 ID를 확인하세요. (데이터 보존됨)`, 'warn');
+      $('individualId').focus();
+
+    } else if (res.status >= 500) {
+      // [4] 500 서버 오류:
+      // 카운터 및 데이터 기기 보존
+      const errMsg = resData?.error || '서버 데이터베이스 일시 오류가 발생했습니다.';
+      showSaveStatus(`⚠ ${errMsg} (데이터는 기기에 안전하게 보존 중)`, 'error');
+
+    } else {
+      // [5] 응답 불명확 또는 기타 오류:
+      // 데이터 반드시 보존!
+      const errMsg = resData?.error || '저장 응답이 불명확하여 데이터를 기기에 보존합니다.';
+      showSaveStatus(`⚠ ${errMsg} (데이터 보존됨)`, 'error');
+    }
+  } catch (netErr) {
+    // [6] 네트워크 오류:
+    // 카운터 및 데이터 기기 보존
+    showSaveStatus('⚠ 네트워크 연결 실패 — 데이터는 기기에 안전하게 보관 중입니다. 연결 확인 후 다시 시도하세요.', 'error');
+  } finally {
+    // [원칙 1]: 저장 완료 후 입력 잠금 해제
+    isSaving = false;
+    setSurveyControlsLocked(false);
+  }
+};
+
+// ============================================================================
+// 6-1. 농가별 현장 조사현황 및 CSV 내보내기 (Step 11-G-1)
+// ============================================================================
+let currentFetchedRecords = []; // 서버에서 조회된 원본 레코드 목록
+let currentFetchedDate = '';
+let currentFetchedFarm = '';
+let currentDataAnomalyError = null; // 중복 또는 계산 불일치 오류 메시지
+
+// 30개체 표준 목록 생성 (1-1 ~ 3-10)
+function getStandardIndividualList() {
+  const list = [];
+  for (let block = 1; block <= 3; block++) {
+    for (let num = 1; num <= 10; num++) {
+      list.push(`${block}-${num}`);
+    }
+  }
+  return list;
+}
+
+// 자연 정렬 비교 함수
+function compareIndividualIds(a, b) {
+  const partsA = String(a).split('-').map(Number);
+  const partsB = String(b).split('-').map(Number);
+  if (!isNaN(partsA[0]) && !isNaN(partsB[0])) {
+    if (partsA[0] !== partsB[0]) return partsA[0] - partsB[0];
+    return (partsA[1] || 0) - (partsB[1] || 0);
+  }
+  return String(a).localeCompare(String(b), undefined, { numeric: true });
+}
+
+// CSV 수식 주입 방지 및 텍스트 이스케이프
+// 선행 공백, 탭, 줄바꿈(\s, \t, \r, \n) 우회 방지: 선행 공백 후 첫 문자가 =, +, -, @ 이거나 탭(\t), 캐리지 리턴(\r)으로 시작하는 경우 ' 접두
+function escapeCsvCell(val) {
+  let str = String(val ?? '');
+  // 수식 주입(=, +, -, @) 및 DDE 실행 우회 방지
+  if (/^[\s\t\r\n]*[=+\-@\t\r]/.test(str)) {
+    str = "'" + str;
+  }
+  return '"' + str.replace(/"/g, '""') + '"';
+}
+
+function showStatusMsg(text, type = 'info') {
+  const el = $('statusMsgBox');
+  if (!el) return;
+  if (!text) {
+    el.style.display = 'none';
+    el.textContent = '';
+    return;
+  }
+  el.style.display = 'block';
+  el.textContent = text;
+  if (type === 'error') {
+    el.style.background = '#7f1d1d';
+    el.style.color = '#fecaca';
+  } else if (type === 'warn') {
+    el.style.background = '#78350f';
+    el.style.color = '#fef3c7';
+  } else {
+    el.style.background = '#0f172a';
+    el.style.color = '#94a3b8';
+  }
+}
+
+// 서버(GET /records)에서 농가별 현장 기록 조회
+async function fetchFarmRecords(targetDate, targetFarm) {
+  const token = getAuthToken();
+  if (!token) {
+    showStatusMsg('⚠ 로그인이 필요합니다. 먼저 PIN 로그인을 완료하세요.', 'warn');
+    return { ok: false, error: 'NO_AUTH' };
+  }
+
+  const baseRecordsUrl = getRecordsUrl();
+  if (!baseRecordsUrl) {
+    showStatusMsg('⚠ Worker API 주소가 설정되지 않았습니다.', 'error');
+    return { ok: false, error: 'NO_URL' };
+  }
+
+  showStatusMsg('⏳ 서버에서 조사 기록을 조회 중입니다...', 'info');
+  const queryUrl = `${baseRecordsUrl}?date=${encodeURIComponent(targetDate)}&farm=${encodeURIComponent(targetFarm)}`;
+
+  try {
+    const res = await fetch(queryUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    let data = null;
+    try { data = await res.json(); } catch (e) {}
+
+    if (res.ok && data?.ok) {
+      currentFetchedRecords = data.records || [];
+      currentFetchedDate = targetDate;
+      currentFetchedFarm = targetFarm;
+      showStatusMsg(''); // 성공 시 메시지 숨김
+      renderStatusList(currentFetchedRecords);
+      return { ok: true, records: currentFetchedRecords, count: data.count };
+    } else if (res.status === 401) {
+      showStatusMsg('⚠ 인증 세션이 만료되었습니다. 다시 로그인하세요.', 'warn');
+      clearAuthToken();
+      showLoginModal(getLoggedInUser(), '조회 권한 만료: 다시 로그인하세요.', hasUnsavedData());
+      return { ok: false, error: 'UNAUTHORIZED' };
+    } else {
+      const errMsg = data?.error || '조회 실패: 서버 응답 오류';
+      showStatusMsg(`⚠ ${errMsg}`, 'error');
+      return { ok: false, error: errMsg };
+    }
+  } catch (netErr) {
+    showStatusMsg('⚠ 네트워크 오류: 서버에 연결할 수 없습니다. 인터넷 상태를 확인하세요.', 'error');
+    return { ok: false, error: 'NETWORK_ERROR' };
+  }
+}
+
+// 조회 결과 화면 렌더링 및 데이터 검증
+function renderStatusList(records) {
+  const container = $('statusListContainer');
+  const countDoneEl = $('statusCountDone');
+  const countPendingEl = $('statusCountPending');
+  const btnCsv = $('btnExportCsv');
+
+  if (!container) return;
+  container.innerHTML = '';
+  currentDataAnomalyError = null;
+
+  // 1. 중복 개체ID 및 합계 정합성 검증
+  const idMap = new Map(); // id -> [records...]
+  let hasDuplicate = false;
+  let hasCalculationMismatch = false;
+  const duplicateIdList = [];
+
+  for (const r of records) {
+    const indId = r.individual_id;
+    if (!idMap.has(indId)) {
+      idMap.set(indId, []);
+    } else {
+      hasDuplicate = true;
+      if (!duplicateIdList.includes(indId)) duplicateIdList.push(indId);
+    }
+    idMap.get(indId).push(r);
+
+    // 합계 검증 (healthy_fruit + sick_fruit === total_fruit)
+    const fruitSum = (r.healthy_fruit || 0) + (r.sick_fruit || 0);
+    const budSum = (r.healthy_bud || 0) + (r.sick_bud || 0);
+    if (r.total_fruit !== fruitSum || r.total_bud !== budSum) {
+      hasCalculationMismatch = true;
+    }
+  }
+
+  if (hasDuplicate) {
+    currentDataAnomalyError = `동일한 개체 ID(${duplicateIdList.join(', ')})의 중복 기록이 발견되었습니다.`;
+    showStatusMsg(`⚠ 경고: ${currentDataAnomalyError} (CSV 다운로드 차단)`, 'error');
+  } else if (hasCalculationMismatch) {
+    currentDataAnomalyError = '과실 또는 봉오리 수량 합계 계산이 일치하지 않는 기록이 있습니다.';
+    showStatusMsg(`⚠ 경고: ${currentDataAnomalyError} (CSV 다운로드 차단)`, 'error');
+  }
+
+  // CSV 다운로드 버튼 활성화/비활성화 (중복/오류 시 또는 저장 레코드 없을 시 차단)
+  if (btnCsv) {
+    btnCsv.disabled = !!currentDataAnomalyError || records.length === 0;
+  }
+
+  // 2. 30개체 표준 목록(1-1 ~ 3-10)과 맵핑하여 렌더링
+  const standardIds = getStandardIndividualList();
+  
+  // 혹시 표준 범위를 벗어난 개체가 있다면 추가 포함
   records.forEach(r => {
-    lines.push([
-      r.surveyDate, r.researcherId, r.farmId, r.farmerName, r.individualId,
-      r.healthyFruit, r.sickFruit, r.totalFruit,
-      r.healthyBud, r.sickBud, r.totalBud,
-      r.diseaseRate, r.note, r.createdAt
-    ].map(esc).join(','));
+    if (!standardIds.includes(r.individual_id)) {
+      standardIds.push(r.individual_id);
+    }
+  });
+  standardIds.sort(compareIndividualIds);
+
+  let doneCount = 0;
+
+  standardIds.forEach(id => {
+    const recordList = idMap.get(id);
+    const itemEl = document.createElement('div');
+
+    if (recordList && recordList.length > 0) {
+      doneCount++;
+      const isDup = recordList.length > 1;
+      const firstRecord = recordList[0];
+      const isMismatch = (firstRecord.healthy_fruit + firstRecord.sick_fruit !== firstRecord.total_fruit) ||
+                         (firstRecord.healthy_bud + firstRecord.sick_bud !== firstRecord.total_bud);
+
+      if (isDup) {
+        // 중복 기록이 발생한 경우: 모든 중복 기록의 조사자 ID 및 저장 시각(created_at)을 상세 노출
+        itemEl.className = 'status-item done warning';
+        const dupDetails = recordList.map((rec, idx) => {
+          const time = rec.created_at ? new Date(rec.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : (rec.created_at || '시각미상');
+          return `<div style="font-size:11px; margin-top:2px; color:#fca5a5;">#${idx + 1} [${rec.researcher_id || '미상'}] ${time} — 과실 ${rec.total_fruit} / 봉오리 ${rec.total_bud}</div>`;
+        }).join('');
+
+        itemEl.innerHTML = `
+          <div style="display:flex; flex-direction:column; width:100%; gap:2px;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <span class="status-id-badge" style="background:#ef4444; color:#fff;">${id} (중복 ${recordList.length}건)</span>
+              <span style="font-size:11px; color:#f87171; font-weight:800;">중복 발생</span>
+            </div>
+            ${dupDetails}
+          </div>
+        `;
+      } else {
+        itemEl.className = `status-item done ${isMismatch ? 'warning' : ''}`;
+        itemEl.innerHTML = `
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="status-id-badge">${firstRecord.individual_id}</span>
+            <span style="font-size:11px; color:#94a3b8;">${firstRecord.researcher_id || ''}</span>
+          </div>
+          <div class="status-counts-info">
+            <span>과실 <b>${firstRecord.healthy_fruit}</b>/${firstRecord.sick_fruit} (합 ${firstRecord.total_fruit})</span>
+            <span>봉오리 <b>${firstRecord.healthy_bud}</b>/${firstRecord.sick_bud} (합 ${firstRecord.total_bud})</span>
+          </div>
+        `;
+      }
+    } else {
+      // 미조사 개체
+      itemEl.className = 'status-item pending';
+      itemEl.innerHTML = `
+        <span class="status-id-badge" style="color:#94a3b8;">${id}</span>
+        <span style="font-size:11px; color:#64748b; font-weight:700;">미조사</span>
+      `;
+    }
+    container.appendChild(itemEl);
   });
 
-  const csvContent = '\ufeff' + lines.join('\r\n');
-  const curDate = $('setupDate').value || getTodayString();
-  const filename = `eggplant_survey_v4_${curDate}.csv`;
+  if (countDoneEl) countDoneEl.textContent = doneCount;
+  if (countPendingEl) countPendingEl.textContent = Math.max(0, 30 - doneCount);
+}
+
+// CSV 파일 내보내기 함수
+function exportSurveyCsv() {
+  if (currentDataAnomalyError) {
+    alert(`CSV를 내보낼 수 없습니다:\n${currentDataAnomalyError}`);
+    return;
+  }
+  if (!currentFetchedRecords || currentFetchedRecords.length === 0) {
+    alert('다운로드할 저장된 조사 데이터가 없습니다.');
+    return;
+  }
+
+  // 컬럼 헤더 순서: 개체ID, 조사 과실 수, 병든 과실 수, 조사 꽃봉오리 수, 병든 꽃봉오리 수, 발병률(%), 비고
+  const headers = [
+    '개체ID',
+    '조사 과실 수',
+    '병든 과실 수',
+    '조사 꽃봉오리 수',
+    '병든 꽃봉오리 수',
+    '발병률(%)',
+    '비고'
+  ];
+
+  const lines = [headers.map(escapeCsvCell).join(',')];
+
+  // 자연 정렬하여 출력
+  const sortedRecords = [...currentFetchedRecords].sort((a, b) => compareIndividualIds(a.individual_id, b.individual_id));
+
+  sortedRecords.forEach(r => {
+    // 수량 확인 (D1 필드 기준)
+    const indId = r.individual_id;
+    const totalFruit = r.total_fruit;
+    const sickFruit = r.sick_fruit;
+    const totalBud = r.total_bud;
+    const sickBud = r.sick_bud;
+    const diseaseRate = ''; // 발병률(%)은 기존 사양대로 빈칸
+    const note = r.note || '';
+
+    lines.push([
+      escapeCsvCell(indId),
+      escapeCsvCell(totalFruit),
+      escapeCsvCell(sickFruit),
+      escapeCsvCell(totalBud),
+      escapeCsvCell(sickBud),
+      escapeCsvCell(diseaseRate),
+      escapeCsvCell(note)
+    ].join(','));
+  });
+
+  const csvContent = '\ufeff' + lines.join('\r\n'); // UTF-8 BOM 적용으로 Excel 한글 깨짐 방지
+  const filename = `eggplant_survey_${currentFetchedFarm}_${currentFetchedDate}.csv`;
 
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
   const a = document.createElement('a');
@@ -1257,10 +2888,257 @@ $('btnExportCsv').onclick = () => {
   a.download = filename;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-};
+}
 
-// 화면 날짜 변경 시 오늘 조사 개체 수 갱신
-$('setupDate').addEventListener('change', updateTodayCountUI);
+function openStatusModal() {
+  const modal = $('statusModal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+
+  // 현재 메타 패널의 날짜와 농가를 기본 선택값으로 동기화
+  const curDate = $('surveyDate').value || getTodayString();
+  const curFarm = $('farmId').value || 'G1';
+
+  const filterDateInput = $('statusFilterDate');
+  const filterFarmSelect = $('statusFilterFarm');
+
+  if (filterDateInput) filterDateInput.value = curDate;
+  if (filterFarmSelect) filterFarmSelect.value = curFarm;
+
+  fetchFarmRecords(curDate, curFarm);
+}
+
+function closeStatusModal() {
+  const modal = $('statusModal');
+  if (modal) modal.style.display = 'none';
+}
+
+// [원칙 4]: 페이지 시작 시 /auth/me로 JWT 유효성 검증
+async function verifyTokenOnStartup(token, expectedUser, requiredDraftUser = null) {
+  const targetMeUrl = getMeUrl();
+  if (!targetMeUrl) {
+    showSaveStatus('⚠ 테스트 Worker URL이 설정되지 않았습니다. 테스트 환경 배포 후 API URL을 연결하세요.', 'warn');
+    return;
+  }
+
+  try {
+    const res = await fetch(targetMeUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    let data = null;
+    try {
+      data = await res.json();
+    } catch (e) {}
+
+    // 1) 토큰 검증 성공
+    if (res.ok && data && data.ok === true && data.researcherId) {
+      const verifiedUser = data.researcherId;
+
+      // [원칙 5]: /auth/me에서 확인된 조사자와 복원된 draft 조사자가 다르면 원래 조사자 재로그인 강제!
+      if (requiredDraftUser && verifiedUser !== requiredDraftUser) {
+        clearAuthToken();
+        setLoggedInUser(requiredDraftUser);
+        showLoginModal(requiredDraftUser, `[${requiredDraftUser}] 조사자의 미저장 데이터가 복원되었습니다. 해당 계정 PIN으로 로그인하세요.`, true);
+        showSaveStatus(`⚠ [${requiredDraftUser}] 계정 인증이 필요합니다. 로그인 후 작업을 계속하세요.`, 'warn');
+        return;
+      }
+
+      setLoggedInUser(verifiedUser);
+      hideLoginModal(); // 검증 성공 후에만 모달을 닫음
+      return;
+    }
+
+    // 2) 401 Unauthorized (토큰 만료/유효하지 않음)
+    if (res.status === 401) {
+      clearAuthToken();
+      const targetUser = requiredDraftUser || expectedUser;
+      showLoginModal(targetUser, '인증 세션이 만료되었습니다. 다시 로그인하세요.', hasUnsavedData());
+      return;
+    }
+
+    // 3) 5xx 서버 오류 등
+    showSaveStatus('⚠ 서버 인증 상태 확인 지연 (조사 데이터는 안전하게 보존 중)', 'warn');
+    const targetUser = requiredDraftUser || expectedUser;
+    showLoginModal(targetUser, '서버 인증 확인 중 오류가 발생했습니다. 다시 로그인하세요.', hasUnsavedData());
+  } catch (netErr) {
+    // 4) 오프라인 / 네트워크 장애
+    showSaveStatus('⚠ 오프라인 모드: 서버 연결 확인 불가 (조사 데이터 안전 보존)', 'warn');
+    if (requiredDraftUser && expectedUser !== requiredDraftUser) {
+      clearAuthToken();
+      setLoggedInUser(requiredDraftUser);
+      showLoginModal(requiredDraftUser, `[${requiredDraftUser}] 조사자의 데이터 복원을 위해 로그인하세요.`, true);
+    } else {
+      hideLoginModal();
+    }
+  }
+}
+
+// 환경 감지 및 테스트 뱃지 표시 제어
+function updateEnvironmentBadge() {
+  const badge = $('envBadgeProd');
+  if (badge) badge.style.display = 'none';
+  const testBadge = $('envBadgeTest');
+  if (testBadge) testBadge.style.display = 'none';
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+  updateEnvironmentBadge();
+  $('surveyDate').value = getTodayString();
+  updateUI();
+
+  // 확인음 환경설정 로드 및 UI 반영
+  loadSoundSettings();
+  updateSoundUI();
+
+  // 확인음 컨트롤 이벤트 리스너 등록
+  const soundToggleBtn = $('soundToggleBtn');
+  if (soundToggleBtn) {
+    soundToggleBtn.addEventListener('click', () => {
+      unlockAudioContext();
+      isSoundEnabled = !isSoundEnabled;
+      saveSoundSettings();
+      updateSoundUI();
+    });
+  }
+
+  const soundSlider = $('soundVolSlider');
+  if (soundSlider) {
+    soundSlider.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      soundVolume = Math.max(0, Math.min(1, val / 100));
+      saveSoundSettings();
+      updateSoundUI();
+    });
+  }
+
+  const soundTestBtn = $('soundTestBtn');
+  if (soundTestBtn) {
+    soundTestBtn.addEventListener('click', () => {
+      unlockAudioContext();
+      playSuccessBeep(true); // 테스트 클릭 시 강제 재생
+    });
+  }
+
+  // 진단 UI 초기화 및 토글 리스너 등록 (Step 11-E-2)
+  updateDiagUI();
+  const diagToggleBtn = $('diagToggleBtn');
+  if (diagToggleBtn) {
+    diagToggleBtn.addEventListener('click', () => {
+      isDiagEnabled = !isDiagEnabled;
+      updateDiagUI();
+      if (isDiagEnabled) {
+        updateDiagDisplay('대기 중 (음성 시작 후 발화하세요)', '마이크 대기', 'interim', false);
+      }
+    });
+  }
+
+  // 농가별 조사현황 및 CSV 버튼 이벤트 리스너 등록 (Step 11-G-1)
+  const btnOpenStatus = $('btnOpenStatusModal');
+  if (btnOpenStatus) btnOpenStatus.addEventListener('click', openStatusModal);
+
+  const btnCloseStatus = $('btnCloseStatusModal');
+  if (btnCloseStatus) btnCloseStatus.addEventListener('click', closeStatusModal);
+
+  const btnRefreshStatus = $('btnRefreshStatus');
+  if (btnRefreshStatus) {
+    btnRefreshStatus.addEventListener('click', () => {
+      const targetDate = $('statusFilterDate').value || getTodayString();
+      const targetFarm = $('statusFilterFarm').value || 'G1';
+      fetchFarmRecords(targetDate, targetFarm);
+    });
+  }
+
+  const filterDateInput = $('statusFilterDate');
+  if (filterDateInput) {
+    filterDateInput.addEventListener('change', () => {
+      const targetDate = filterDateInput.value;
+      const targetFarm = $('statusFilterFarm').value || 'G1';
+      fetchFarmRecords(targetDate, targetFarm);
+    });
+  }
+
+  const filterFarmSelect = $('statusFilterFarm');
+  if (filterFarmSelect) {
+    filterFarmSelect.addEventListener('change', () => {
+      const targetDate = $('statusFilterDate').value || getTodayString();
+      const targetFarm = filterFarmSelect.value;
+      fetchFarmRecords(targetDate, targetFarm);
+    });
+  }
+
+  const btnExportCsv = $('btnExportCsv');
+  if (btnExportCsv) btnExportCsv.addEventListener('click', exportSurveyCsv);
+
+  let requiredDraftUser = null; // 임시 데이터 복원에 의해 요구되는 조사자 ID
+
+  // 1. [핵심 복원 로직]: 새로고침이나 브라우저 재시작 시 미저장 데이터 감지 및 복원 확인
+  const draft = getActiveDraft();
+  if (draft && (draft.counts?.A > 0 || draft.counts?.B > 0 || draft.counts?.C > 0 || draft.counts?.X > 0 || draft.individualId)) {
+    const timeStr = draft.updatedAt ? new Date(draft.updatedAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '최근';
+    const totalFruit = (draft.counts?.A || 0) + (draft.counts?.B || 0);
+    const totalBud = (draft.counts?.C || 0) + (draft.counts?.X || 0);
+
+    const restoreMsg = `[데이터 복원 안내]\n\n` +
+      `이전에 [${draft.researcherId}] 조사자가 작성 중이던 미저장 데이터가 있습니다.\n` +
+      `- 시간: ${timeStr}\n` +
+      `- 개체 ID: ${draft.individualId || '미입력'}\n` +
+      `- 과실(A+B): ${totalFruit}개, 봉오리(C+X): ${totalBud}개\n\n` +
+      `해당 데이터를 화면에 복원하시겠습니까?`;
+
+    if (confirm(restoreMsg)) {
+      counts.A = draft.counts?.A || 0;
+      counts.B = draft.counts?.B || 0;
+      counts.C = draft.counts?.C || 0;
+      counts.X = draft.counts?.X || 0;
+      if (draft.surveyDate) $('surveyDate').value = draft.surveyDate;
+      if (draft.farmId) $('farmId').value = draft.farmId;
+      $('individualId').value = draft.individualId || '';
+      $('note').value = draft.note || '';
+      lastSuggestedIndividualId = null;
+      updateUI();
+
+      isDraftProtected = false;
+      hideDraftProtectionBanner();
+
+      // 복원된 데이터의 소유 조사자 기록 (일반 초기 인증에 덮어써지지 않도록 보장)
+      requiredDraftUser = draft.researcherId;
+      showSaveStatus(`✓ [${draft.researcherId}] 미저장 데이터가 복원되었습니다.`, 'warn');
+    } else {
+      if (confirm('미저장 데이터를 영구히 폐기하고 새로 작성하시겠습니까?\n취소 시 이전 데이터가 보호되며 새 작업 덮어쓰기가 방지됩니다.')) {
+        discardActiveDraft();
+        isDraftProtected = false;
+        hideDraftProtectionBanner();
+      } else {
+        // [원칙 3]: 복원 거절 후 폐기까지 취소한 경우 기존 draft가 새 입력으로 덮어써지지 않도록 보호 모드 활성화
+        isDraftProtected = true;
+        showDraftProtectionBanner(draft);
+        showSaveStatus('⚠ 이전 미저장 데이터가 보존 중입니다. 새 데이터 덮어쓰기가 방지되었습니다.', 'warn');
+      }
+    }
+  }
+
+  // 2. 초기 인증 상태 결정 (모달 표시 여부와 무관하게 항상 실행)
+  const token = getAuthToken();
+  const savedUser = getLoggedInUser();
+  const targetUser = requiredDraftUser || savedUser;
+  $('currentUserId').textContent = targetUser;
+
+  if (!token) {
+    // 토큰이 없으면 로그인 모달 표시 (draft가 있으면 draft 조사자로 잠금)
+    const lockToUser = !!requiredDraftUser;
+    const notice = requiredDraftUser
+      ? `[${requiredDraftUser}] 조사자의 미저장 데이터를 복원했습니다. 계속하려면 PIN을 입력하세요.`
+      : '가지 생육조사를 시작하려면 PIN을 입력하세요.';
+    showLoginModal(targetUser, notice, lockToUser);
+  } else {
+    // 토큰이 있으면 반드시 /auth/me로 검증하고, 검증 성공 후에만 로그인 모달을 닫음
+    await verifyTokenOnStartup(token, savedUser, requiredDraftUser);
+  }
+});
 </script>
 </body>
 </html>
